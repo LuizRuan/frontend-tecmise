@@ -27,7 +27,6 @@
           required
           autocomplete="off"
         />
-        <!-- Mensagem de erro sempre aparece aqui -->
         <p v-if="senhaErro" class="erro">{{ senhaErro }}</p>
       </div>
 
@@ -102,12 +101,13 @@ const login = async () => {
 
     if (res.ok) {
       const data = await res.json()
+      // Salva o id, email e nome do usuário no localStorage
       localStorage.setItem('usuario', JSON.stringify({
   id: data.id,
   email: data.email,
-  nome: data.nome || 'Usuário' // se retornar nome, use, senão coloca um padrão
+  nome: data.nome || 'Usuário'
 }))
- // <-- Salva o id do usuário
+
       ok.value = true
       senhaErro.value = ''
       setTimeout(() => router.push('/dashboard'), 1100)
@@ -116,7 +116,6 @@ const login = async () => {
       ok.value = false
     }
   } catch (e) {
-    // Mesmo com erro de rede/server: mostra erro de login comum
     senhaErro.value = 'E-mail ou senha incorretos.'
     ok.value = false
   }

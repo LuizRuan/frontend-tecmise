@@ -126,7 +126,7 @@
               autocomplete="off"
               :class="{ erroInput: erroCpf }"
               @input="limparCpf"
-/>
+             />
 
               <input v-model="clienteForm.email" type="email" placeholder="E-mail" required autocomplete="off" :class="{ erroInput: erroEmail }" @input="erroEmail = ''" />
               <input v-model="clienteForm.dataNascimento" type="date" placeholder="Data de nascimento" required :class="{ erroInput: erroDataNascimento }" @input="erroDataNascimento = ''" />
@@ -176,7 +176,6 @@
               </div>
               <input v-model="perfilForm.nome" type="text" placeholder="Nome de usuário" required />
               <input v-model="perfilForm.email" type="email" placeholder="E-mail" required />
-              <input v-model="perfilForm.senha" type="password" placeholder="Nova senha (deixe em branco para não alterar)" />
               <div class="modal-btns">
                 <button type="submit">Salvar</button>
                 <button type="button" @click="fecharPerfil">Cancelar</button>
@@ -223,6 +222,94 @@
 </template>
 
 <script setup>
+
+const defaultAvatar = "https://ui-avatars.com/api/?background=2db6ff&color=fff&name=U"
+import { reactive, onMounted } from 'vue'
+
+const usuario = reactive({
+  nome: '',
+  email: '',
+  fotoUrl: ''
+})
+onMounted(() => {
+  async function salvarCliente() {
+  // ... (validações aqui)
+  if (!clienteForm.anoId || !clienteForm.turmaId) { alert('Selecione o ano e a turma.'); return }
+
+  try {
+    const usuario = JSON.parse(localStorage.getItem('usuario'))
+    const res = await fetch('http://localhost:8080/estudantes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nome: clienteForm.nome,
+        cpf: clienteForm.cpf,
+        email: clienteForm.email,
+        data_nascimento: clienteForm.dataNascimento,
+        telefone: clienteForm.telefone,
+        foto_url: clienteForm.fotoUrl,
+        ano_id: clienteForm.anoId,
+        turma_id: clienteForm.turmaId,
+        usuario_id: usuario.id
+      })
+    });
+
+    if (!res.ok) {
+      throw new Error("Erro ao cadastrar estudante");
+    }
+    // Atualiza lista de estudantes do banco após cadastrar
+    await carregarEstudantes()
+    fecharModal()
+  } catch (err) {
+    alert('Erro ao cadastrar estudante');
+  }
+}
+
+  // Só roda no navegador
+  if (typeof window !== 'undefined') {
+    const salvo = localStorage.getItem('usuario')
+    if (salvo) {
+      const u = JSON.parse(salvo)
+      usuario.nome = u.nome || ''
+      usuario.email = u.email || ''
+      usuario.fotoUrl = u.fotoUrl || ''
+    }
+  }
+})
+const cadastrarEstudante = async () => {
+  const usuario = JSON.parse(localStorage.getItem('usuario'))
+
+  if (!usuario) {
+    alert("Usuário não logado")
+    return
+  }
+
+  try {
+    const res = await fetch('http://localhost:8080/estudantes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nome: novoAluno.nome,
+        email: novoAluno.email,
+        telefone: novoAluno.telefone,
+        usuario_id: usuario.id
+      })
+    })
+
+    if (!res.ok) {
+      alert("Erro ao cadastrar aluno")
+      return
+    }
+
+    alert("Aluno cadastrado com sucesso!")
+    fecharPopups()
+    carregarEstudantes() // se tiver um método pra atualizar a lista
+  } catch (e) {
+    console.error("Erro:", e)
+    alert("Erro ao cadastrar")
+  }
+}
+
 function limparCpf() {
   clienteForm.cpf = clienteForm.cpf.replace(/\D/g, '').slice(0,11)
   erroCpf.value = ''
@@ -255,16 +342,6 @@ function formatarDataBrasileira(dataIso) {
   return `${dia}/${mes}/${ano}`
 }
 
-import { ref, reactive, computed, watch } from 'vue'
-
-// --- DADOS GERAIS E MOCKS --- //
-const defaultAvatar = "https://ui-avatars.com/api/?background=2db6ff&color=fff&name=U"
-
-const usuario = reactive({
-  nome: 'Usuário Padrão',
-  email: 'usuario@email.com',
-  fotoUrl: ""
-})
 
 const anos = ref([
   { id: 1, nome: '6º ano' },
@@ -504,8 +581,16 @@ function salvarPerfil() {
   usuario.nome = perfilForm.nome
   usuario.email = perfilForm.email
   usuario.fotoUrl = perfilForm.fotoUrl
+
+  // Salva no localStorage para persistir
+  localStorage.setItem('usuario', JSON.stringify(usuario))
+    // Fecha o modal de perfil
+  showPerfil.value = false
+
   fecharPerfil()
 }
+
+
 function onFotoPerfilChange(e) {
   const file = e.target.files[0]
   if (!file) return

@@ -3,6 +3,15 @@
     <form class="card" @submit.prevent="cadastrar" novalidate>
       <h1 class="brand">TecMise</h1>
       <h2>Criar conta</h2>
+      <div class="input-group">
+        <input
+          v-model="nome"
+          type="text"
+          placeholder="Nome completo"
+          required
+          autocomplete="off"
+        />
+      </div>
 
       <div class="input-group">
         <input
@@ -64,11 +73,15 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 
+// ADICIONE AQUI 👇
+const nome = ref('')           // <-- Adicione ESTA LINHA!
+
 onMounted(() => {
   const link = document.createElement('link')
   link.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap'
   link.rel = 'stylesheet'
   document.head.appendChild(link)
+  
 })
 
 const email = ref('')
@@ -129,31 +142,36 @@ const cadastrar = async () => {
 
   loading.value = true
   try {
-    // Chama o backend para cadastrar
-    const res = await fetch('http://localhost:8080/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value, senha: senha.value })
+  // Chama o backend para cadastrar
+  const res = await fetch('http://localhost:8080/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      nome: nome.value,
+      email: email.value,
+      senha: senha.value
     })
+  }); // <-- Fecha aqui!
 
-    if (res.ok) {
-      ok.value = true
-      erro.value = ''
-      setTimeout(() => router.push('/login'), 1200)
-      email.value = ''
-      senha.value = ''
-      confirmaSenha.value = ''
-    } else if (res.status === 409) {
-      erro.value = 'E-mail já cadastrado.'
-    } else if (res.status === 400) {
-      erro.value = 'Dados inválidos. Verifique e tente novamente.'
-    } else {
-      erro.value = 'Erro ao cadastrar. Tente novamente.'
-    }
-  } catch (e) {
+  if (res.ok) {
+    ok.value = true
+    erro.value = ''
+    setTimeout(() => router.push('/login'), 1200)
+    email.value = ''
+    senha.value = ''
+    confirmaSenha.value = ''
+  } else if (res.status === 409) {
+    erro.value = 'E-mail já cadastrado.'
+  } else if (res.status === 400) {
+    erro.value = 'Dados inválidos. Verifique e tente novamente.'
+  } else {
     erro.value = 'Erro ao cadastrar. Tente novamente.'
   }
-  loading.value = false
+} catch (e) {
+  erro.value = 'Erro ao cadastrar. Tente novamente.'
+}
+loading.value = false
+
 }
 </script>
 
