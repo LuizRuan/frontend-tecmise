@@ -1,8 +1,11 @@
 <template>
+  <!-- Container centralizado para o formulário de registro -->
   <div class="center">
+    <!-- Card com o formulário -->
     <form class="card" @submit.prevent="cadastrar" novalidate>
       <h1 class="brand">TecMise</h1>
       <h2>Criar conta</h2>
+      <!-- Campo Nome completo -->
       <div class="input-group">
         <input
           v-model="nome"
@@ -12,7 +15,7 @@
           autocomplete="off"
         />
       </div>
-
+      <!-- Campo E-mail, com validação visual ao perder foco -->
       <div class="input-group">
         <input
           v-model="email"
@@ -26,7 +29,7 @@
         />
         <p v-if="emailErro && !emailFocus" class="erro">{{ emailErro }}</p>
       </div>
-
+      <!-- Campo Senha, com validação visual ao perder foco -->
       <div class="input-group">
         <input
           v-model="senha"
@@ -40,7 +43,7 @@
         />
         <p v-if="senhaErro && !senhaFocus" class="erro">{{ senhaErro }}</p>
       </div>
-
+      <!-- Campo Confirmação de Senha, com validação visual ao perder foco -->
       <div class="input-group">
         <input
           v-model="confirmaSenha"
@@ -54,13 +57,16 @@
         />
         <p v-if="confirmaSenhaErro && !confirmaSenhaFocus" class="erro">{{ confirmaSenhaErro }}</p>
       </div>
-
+      <!-- Botão de cadastro, desabilitado durante loading -->
       <button type="submit" :disabled="loading">
         <span v-if="loading">Cadastrando...</span>
         <span v-else>Cadastrar</span>
       </button>
+      <!-- Mensagem de erro geral -->
       <p v-if="erro" class="erro">{{ erro }}</p>
+      <!-- Mensagem de sucesso -->
       <p v-if="ok" class="ok">Cadastrado com sucesso! Redirecionando...</p>
+      <!-- Link para login -->
       <p class="login-link">
         Já tem conta? <NuxtLink to="/login">Entrar</NuxtLink>
       </p>
@@ -69,39 +75,57 @@
 </template>
 
 <script setup>
+/**
+ * Script Vue 3 usando Composition API para registro de usuário
+ * 
+ * Gerencia estados dos campos, validações e integra com o backend
+ */
+
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+
+// Instância do roteador Vue Router
 const router = useRouter()
 
-// ADICIONE AQUI 👇
-const nome = ref('')           // <-- Adicione ESTA LINHA!
+// Campos do formulário
+const nome = ref('')               // Nome completo do usuário
+const email = ref('')              // E-mail do usuário
+const senha = ref('')              // Senha do usuário
+const confirmaSenha = ref('')      // Confirmação da senha
 
+// Estados de feedback do usuário
+const erro = ref('')               // Mensagem de erro geral
+const ok = ref(false)              // Status de cadastro com sucesso
+const loading = ref(false)         // Status de loading/cadastro em andamento
+
+// Estados de erro de cada campo
+const emailErro = ref('')          // Erro de e-mail
+const senhaErro = ref('')          // Erro de senha
+const confirmaSenhaErro = ref('')  // Erro de confirmação de senha
+
+// Foco dos campos (para UX, só mostra erro ao sair do campo)
+const emailFocus = ref(false)
+const senhaFocus = ref(false)
+const confirmaSenhaFocus = ref(false)
+
+// Estado para controle de campos tocados (pode ser usado em validação adicional)
+let touched = ref(false)
+
+/**
+ * Adiciona a fonte Montserrat no carregamento do componente
+ */
 onMounted(() => {
   const link = document.createElement('link')
   link.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap'
   link.rel = 'stylesheet'
   document.head.appendChild(link)
-  
 })
 
-const email = ref('')
-const senha = ref('')
-const confirmaSenha = ref('')
-const erro = ref('')
-const ok = ref(false)
-const loading = ref(false)
-
-const emailErro = ref('')
-const senhaErro = ref('')
-const confirmaSenhaErro = ref('')
-
-const emailFocus = ref(false)
-const senhaFocus = ref(false)
-const confirmaSenhaFocus = ref(false)
-
-// Só mostra erro após tentar enviar ou sair do campo
-let touched = ref(false)
-
+/**
+ * Valida o campo de e-mail:
+ * - Obrigatório
+ * - Regex para formato válido
+ */
 function validarEmail() {
   if (!email.value) {
     emailErro.value = 'O e-mail é obrigatório.'
@@ -111,6 +135,12 @@ function validarEmail() {
     emailErro.value = ''
   }
 }
+
+/**
+ * Valida o campo de senha:
+ * - Obrigatório
+ * - Mínimo de 8 caracteres
+ */
 function validarSenha() {
   if (!senha.value) {
     senhaErro.value = 'A senha é obrigatória.'
@@ -120,6 +150,12 @@ function validarSenha() {
     senhaErro.value = ''
   }
 }
+
+/**
+ * Valida o campo de confirmação de senha:
+ * - Obrigatório
+ * - Deve ser igual à senha
+ */
 function validarConfirmaSenha() {
   if (!confirmaSenha.value) {
     confirmaSenhaErro.value = 'Confirme sua senha.'
@@ -130,6 +166,12 @@ function validarConfirmaSenha() {
   }
 }
 
+/**
+ * Função principal de cadastro:
+ * - Valida os campos
+ * - Chama o backend (POST /register)
+ * - Mostra mensagens de erro/sucesso e redireciona
+ */
 const cadastrar = async () => {
   touched.value = true
   erro.value = ''
@@ -138,44 +180,53 @@ const cadastrar = async () => {
   validarSenha()
   validarConfirmaSenha()
 
+  // Não prossegue se houver erro em algum campo
   if (emailErro.value || senhaErro.value || confirmaSenhaErro.value) return
 
   loading.value = true
   try {
-  // Chama o backend para cadastrar
-  const res = await fetch('http://localhost:8080/register', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      nome: nome.value,
-      email: email.value,
-      senha: senha.value
+    // Chama o backend com dados do novo usuário
+    const res = await fetch('http://localhost:8080/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nome: nome.value,
+        email: email.value,
+        senha: senha.value
+      })
     })
-  }); // <-- Fecha aqui!
 
-  if (res.ok) {
-    ok.value = true
-    erro.value = ''
-    setTimeout(() => router.push('/login'), 1200)
-    email.value = ''
-    senha.value = ''
-    confirmaSenha.value = ''
-  } else if (res.status === 409) {
-    erro.value = 'E-mail já cadastrado.'
-  } else if (res.status === 400) {
-    erro.value = 'Dados inválidos. Verifique e tente novamente.'
-  } else {
+    if (res.ok) {
+      // Cadastro OK: exibe mensagem e redireciona
+      ok.value = true
+      erro.value = ''
+      setTimeout(() => router.push('/login'), 1200)
+      email.value = ''
+      senha.value = ''
+      confirmaSenha.value = ''
+    } else if (res.status === 409) {
+      // Backend retornou conflito: e-mail já cadastrado
+      erro.value = 'E-mail já cadastrado.'
+    } else if (res.status === 400) {
+      // Backend retornou erro de validação
+      erro.value = 'Dados inválidos. Verifique e tente novamente.'
+    } else {
+      // Outro erro inesperado
+      erro.value = 'Erro ao cadastrar. Tente novamente.'
+    }
+  } catch (e) {
+    // Falha na requisição ao backend
     erro.value = 'Erro ao cadastrar. Tente novamente.'
   }
-} catch (e) {
-  erro.value = 'Erro ao cadastrar. Tente novamente.'
-}
-loading.value = false
-
+  loading.value = false
 }
 </script>
 
 <style scoped>
+/* 
+  Estilos do componente de registro 
+  - Mesma identidade visual do login: layout, cores, responsividade
+*/
 .center {
   min-height: 100vh;
   display: flex;

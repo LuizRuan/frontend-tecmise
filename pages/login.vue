@@ -1,9 +1,12 @@
 <template>
+  <!-- Container centralizado para o formulário de login -->
   <div class="center">
+    <!-- Card do formulário -->
     <form class="card" @submit.prevent="login" novalidate>
       <h1 class="brand">TecMise</h1>
       <h2>Entrar</h2>
 
+      <!-- Campo de E-mail -->
       <div class="input-group">
         <input
           v-model="email"
@@ -17,6 +20,7 @@
         <p v-if="emailErro" class="erro">{{ emailErro }}</p>
       </div>
 
+      <!-- Campo de Senha -->
       <div class="input-group">
         <input
           v-model="senha"
@@ -30,11 +34,14 @@
         <p v-if="senhaErro" class="erro">{{ senhaErro }}</p>
       </div>
 
+      <!-- Botão de Login -->
       <button type="submit" :disabled="loading">
         <span v-if="loading">Entrando...</span>
         <span v-else>Entrar</span>
       </button>
+      <!-- Mensagem de sucesso -->
       <p v-if="ok" class="ok">Login realizado! Redirecionando...</p>
+      <!-- Link para cadastro -->
       <p class="register-link">
         Não tem conta?
         <NuxtLink to="/register">Cadastre-se</NuxtLink>
@@ -44,10 +51,20 @@
 </template>
 
 <script setup>
+/**
+ * Script utilizando Composition API (Vue 3)
+ * Funções e variáveis para o login de usuário
+ */
+
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+
+// Instância do roteador Vue Router
 const router = useRouter()
 
+/**
+ * onMounted: adiciona fonte Montserrat ao head do documento ao montar o componente
+ */
 onMounted(() => {
   const link = document.createElement('link')
   link.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap'
@@ -55,25 +72,35 @@ onMounted(() => {
   document.head.appendChild(link)
 })
 
-const email = ref('')
-const senha = ref('')
-const ok = ref(false)
-const loading = ref(false)
-const emailErro = ref('')
-const senhaErro = ref('')
+// Estados reativos para campos e status
+const email = ref('')         // E-mail do usuário
+const senha = ref('')         // Senha do usuário
+const ok = ref(false)         // Status de login realizado
+const loading = ref(false)    // Status de carregamento do login
+const emailErro = ref('')     // Erro relacionado ao campo de e-mail
+const senhaErro = ref('')     // Erro relacionado ao campo de senha
 
+/**
+ * Limpa a mensagem de erro do campo ao focar
+ * @param {string} field - Nome do campo a ser limpo ('email' ou 'senha')
+ */
 function clearErro(field) {
   if (field === 'email') emailErro.value = ''
   if (field === 'senha') senhaErro.value = ''
 }
 
+/**
+ * Função de login, chamada ao submeter o formulário
+ * Faz validação dos campos, chama backend e trata respostas
+ */
 const login = async () => {
+  // Limpa erros anteriores
   emailErro.value = ''
   senhaErro.value = ''
   ok.value = false
   let hasError = false
 
-  // Validação
+  // Validação do e-mail
   if (!email.value) {
     emailErro.value = 'O e-mail é obrigatório.'
     hasError = true
@@ -81,6 +108,7 @@ const login = async () => {
     emailErro.value = 'Digite um e-mail válido.'
     hasError = true
   }
+  // Validação da senha
   if (!senha.value) {
     senhaErro.value = 'A senha é obrigatória.'
     hasError = true
@@ -92,7 +120,7 @@ const login = async () => {
 
   loading.value = true
   try {
-    // Chama o backend para login
+    // Chama a rota /login do backend com método POST
     const res = await fetch('http://localhost:8080/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -101,21 +129,23 @@ const login = async () => {
 
     if (res.ok) {
       const data = await res.json()
-      // Salva o id, email e nome do usuário no localStorage
+      // Salva dados do usuário autenticado no localStorage
       localStorage.setItem('usuario', JSON.stringify({
-  id: data.id,
-  email: data.email,
-  nome: data.nome || 'Usuário'
-}))
-
+        id: data.id,
+        email: data.email,
+        nome: data.nome || 'Usuário'
+      }))
       ok.value = true
       senhaErro.value = ''
+      // Redireciona após 1,1 segundos para o dashboard
       setTimeout(() => router.push('/dashboard'), 1100)
     } else {
+      // Mensagem padrão de erro (credenciais inválidas)
       senhaErro.value = 'E-mail ou senha incorretos.'
       ok.value = false
     }
   } catch (e) {
+    // Erro na requisição (falha de conexão, etc)
     senhaErro.value = 'E-mail ou senha incorretos.'
     ok.value = false
   }
@@ -124,7 +154,11 @@ const login = async () => {
 </script>
 
 <style scoped>
-/* -- Seu CSS original sem alteração -- */
+/* 
+  Estilos do componente de login 
+  - Layout centralizado, card com efeito de sombra, cores, transições
+  - Responsividade para largura máxima
+*/
 .center {
   min-height: 100vh;
   display: flex;
