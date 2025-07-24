@@ -1,14 +1,18 @@
 <template>
+  <!-- Área principal do dashboard -->
   <div class="dashboard-bg" @click="fecharPopups">
     <div class="dashboard-container expandido" @click.stop>
       <!-- HEADER -->
       <header class="header">
         <div class="logo">TecMise</div>
         <div class="user-info">
+          <!-- Avatar do usuário -->
           <div class="avatar">
             <img :src="usuario.fotoUrl || defaultAvatar" alt="avatar" />
           </div>
+          <!-- Saudação ao usuário -->
           <span class="user-name">Olá, <strong>{{ usuario.nome }}</strong></span>
+          <!-- Botão para abrir o modal de perfil -->
           <button class="profile-btn" @click.stop="abrirPerfil">Perfil</button>
         </div>
       </header>
@@ -16,15 +20,18 @@
       <!-- MAIN CONTENT -->
       <main class="main-content expandido-main">
         <section class="clientes-section">
+          <!-- Cabeçalho da seção de estudantes com filtros -->
           <div class="clientes-header">
             <div class="filtros-flex">
               <h2>Estudantes</h2>
               <div class="ano-turma-box">
+                <!-- Filtro por ano -->
                 <span class="filtro-label">Ano:</span>
                 <div class="dropdown-wrap">
                   <button class="ano-btn" @click.stop="toggleDropdown('ano')" :aria-expanded="dropdownAnoAberto">
                     {{ anoSelecionado ? (anoSelecionado.id === null ? 'Todos' : anoSelecionado.nome) : 'Selecione' }}
                   </button>
+                  <!-- Lista de opções de anos -->
                   <div v-if="dropdownAnoAberto" class="dropdown-ano" @mousedown.stop>
                     <div class="dropdown-item" @click="selecionarAno({id: null, nome: 'Todos'})" :class="{'selected-todos': anoSelecionado && anoSelecionado.id === null}">
                       Todos os anos
@@ -34,11 +41,14 @@
                     </div>
                   </div>
                 </div>
+
+                <!-- Filtro por turma -->
                 <span class="filtro-label" style="margin-left:18px;">Turma:</span>
                 <div class="dropdown-wrap">
                   <button class="ano-btn" @click.stop="toggleDropdown('turma')" :aria-expanded="dropdownTurmaAberto">
                     {{ turmaSelecionada ? (turmaSelecionada.id === null ? 'Todas' : turmaSelecionada.nome) : 'Selecione' }}
                   </button>
+                  <!-- Lista de opções de turmas -->
                   <div v-if="dropdownTurmaAberto" class="dropdown-ano" @mousedown.stop>
                     <div class="dropdown-item" @click="selecionarTurma({id: null, nome: 'Todas'})" :class="{'selected-todos': turmaSelecionada && turmaSelecionada.id === null}">
                       Todas as turmas
@@ -50,19 +60,18 @@
                 </div>
               </div>
             </div>
+            <!-- Botão para abrir modal de novo estudante -->
             <button class="add-btn" @click.stop="abrirModalAdicionar">+ Novo Estudante</button>
           </div>
+
+          <!-- TABELA DE ESTUDANTES -->
           <div class="table-scroll expandido-tabela">
             <table class="clientes-table">
               <thead>
                 <tr>
-                  <th @click="ordenarPor('nome')" :class="{sortable:true,active:ordenacao.campo==='nome'}">
-                    Nome <span v-if="ordenacao.campo==='nome'">{{ ordenacao.crescente ? '▲':'▼' }}</span>
-                  </th>
+                  <th>Nome</th>
                   <th>CPF</th>
-                  <th @click="ordenarPor('email')" :class="{sortable:true,active:ordenacao.campo==='email'}">
-                    Email <span v-if="ordenacao.campo==='email'">{{ ordenacao.crescente ? '▲':'▼' }}</span>
-                  </th>
+                  <th>Email</th>
                   <th>Data Nasc.</th>
                   <th>Telefone</th>
                   <th>Ano</th>
@@ -71,6 +80,7 @@
                 </tr>
               </thead>
               <tbody>
+                <!-- Linha para cada estudante -->
                 <tr v-for="c in clientesFiltradosOrdenados" :key="c.id">
                   <td class="col-nome">
                     <div class="nome-flex">
@@ -90,10 +100,12 @@
                   <td class="center">{{ getAnoNome(c.anoId) }}</td>
                   <td class="center">{{ getTurmaNome(c.anoId, c.turmaId) }}</td>
                   <td style="text-align:right;">
+                    <!-- Botões de ação para cada estudante -->
                     <button class="edit-btn" @click.stop="editar(c)">Editar</button>
                     <button class="del-btn" @click.stop="abrirConfirmarExcluir(c)">Excluir</button>
                   </td>
                 </tr>
+                <!-- Mensagem caso não existam estudantes -->
                 <tr v-if="clientesFiltradosOrdenados.length === 0">
                   <td colspan="8" class="empty-row">Nenhum estudante cadastrado para este ano/turma.</td>
                 </tr>
@@ -105,67 +117,60 @@
 
       <!-- MODAL ESTUDANTE -->
       <transition name="modal">
-        <div v-if="showModal" class="modal-bg">
-          <div class="modal-card">
-            <h3 class="modal-title">{{ editando ? 'Editar estudante' : 'Novo estudante' }}</h3>
-            <form @submit.prevent="salvarCliente">
-              <div class="avatar-edit">
-                <label for="foto-estudante">
-                  <img :src="clienteForm.fotoUrl || defaultAvatar" class="avatar-img" alt="Foto do estudante" />
-                  <input id="foto-estudante" type="file" accept="image/*" @change="onFotoEstudanteChange" style="display:none" />
-                </label>
-                <span class="avatar-upload-text" @click="dispararInputEstudante()">Adicionar / Alterar foto</span>
-              </div>
-              <input v-model="clienteForm.nome" type="text" placeholder="Nome" required autocomplete="off" :class="{ erroInput: erroNome }" @input="erroNome = ''" />
-              <input
-               v-model="clienteForm.cpf"
-              type="text"
-              maxlength="11"
-              placeholder="CPF (apenas números)"
-              required
-              autocomplete="off"
-              :class="{ erroInput: erroCpf }"
-              @input="limparCpf"
-             />
-
-              <input v-model="clienteForm.email" type="email" placeholder="E-mail" required autocomplete="off" :class="{ erroInput: erroEmail }" @input="erroEmail = ''" />
-              <input v-model="clienteForm.dataNascimento" type="date" placeholder="Data de nascimento" required :class="{ erroInput: erroDataNascimento }" @input="erroDataNascimento = ''" />
-              <input v-model="clienteForm.telefone" type="text" placeholder="Telefone (opcional)" autocomplete="off" :class="{ erroInput: erroTelefone }" @input="erroTelefone = ''" />
-              <div style="height: 1.2rem; margin-bottom: -10px;">
-                <p v-if="erroNome" class="erro-msg">{{ erroNome }}</p>
-                <p v-else-if="erroCpf" class="erro-msg">{{ erroCpf }}</p>
-                <p v-else-if="erroEmail" class="erro-msg">{{ erroEmail }}</p>
-                <p v-else-if="erroDataNascimento" class="erro-msg">{{ erroDataNascimento }}</p>
-                <p v-else-if="erroTelefone" class="erro-msg">{{ erroTelefone }}</p>
-              </div>
-              <div style="width:100%;text-align:left;margin:8px 0 14px 0;display:flex;gap:20px;">
-                <div style="flex:1;">
-                  <label style="color:#caf3ff;font-size:.97rem;">Ano:</label>
-                  <select v-model.number="clienteForm.anoId" required style="margin-top:4px;width:100%;padding:6px 12px;border-radius:6px;background:#25447b;color:#fff;">
-                    <option v-for="ano in anos" :key="ano.id" :value="ano.id">{{ ano.nome }}</option>
-                  </select>
-                </div>
-                <div style="flex:1;">
-                  <label style="color:#caf3ff;font-size:.97rem;">Turma:</label>
-                  <select v-model.number="clienteForm.turmaId" required style="margin-top:4px;width:100%;padding:6px 12px;border-radius:6px;background:#25447b;color:#fff;">
-                    <option v-for="turma in turmasDoAnoModal" :key="turma.id" :value="turma.id">{{ turma.nome }}</option>
-                  </select>
-                </div>
-              </div>
-              <div class="modal-btns">
-                <button type="submit">{{ editando ? 'Salvar' : 'Cadastrar' }}</button>
-                <button type="button" @click="fecharModal">Cancelar</button>
-              </div>
-            </form>
-          </div>
+  <div v-if="showModal" class="modal-bg">
+    <div class="modal-card">
+      <h3 class="modal-title">{{ editando ? 'Editar estudante' : 'Novo estudante' }}</h3>
+      <form @submit.prevent="salvarCliente">
+        <div class="avatar-edit">
+          <label for="foto-estudante">
+            <img :src="clienteForm.fotoUrl || defaultAvatar" class="avatar-img" alt="Foto do estudante" />
+            <input id="foto-estudante" type="file" accept="image/*" @change="onFotoEstudanteChange" style="display:none" />
+          </label>
+          <span class="avatar-upload-text" @click="dispararInputEstudante()">Adicionar / Alterar foto</span>
         </div>
-      </transition>
+        
+        <input v-model="clienteForm.nome" type="text" placeholder="Nome" required autocomplete="off" :class="{ erroInput: erroNome }" @input="erroNome = ''" />
+        <p v-if="erroNome" class="erro-msg">{{ erroNome }}</p>
+
+        <input
+          v-model="clienteForm.cpf"
+          type="text"
+          maxlength="11"
+          placeholder="CPF (apenas números)"
+          required
+          autocomplete="off"
+          :class="{ erroInput: erroCpf }"
+          @input="limparCpf"
+        />
+        <p v-if="erroCpf" class="erro-msg">{{ erroCpf }}</p>
+
+        <input v-model="clienteForm.email" type="email" placeholder="E-mail" required autocomplete="off" :class="{ erroInput: erroEmail }" @input="erroEmail = ''" />
+        <p v-if="erroEmail" class="erro-msg">{{ erroEmail }}</p>
+
+        <input v-model="clienteForm.dataNascimento" type="date" placeholder="Data de nascimento" required :class="{ erroInput: erroDataNascimento }" @input="erroDataNascimento = ''" />
+        <p v-if="erroDataNascimento" class="erro-msg">{{ erroDataNascimento }}</p>
+
+        <input v-model="clienteForm.telefone" type="text" placeholder="Telefone (opcional)" autocomplete="off" :class="{ erroInput: erroTelefone }" @input="erroTelefone = ''" />
+        <p v-if="erroTelefone" class="erro-msg">{{ erroTelefone }}</p>
+
+        <!-- Restante do seu modal... -->
+        <div class="modal-btns">
+          <button type="submit">{{ editando ? 'Salvar' : 'Cadastrar' }}</button>
+          <button type="button" @click="fecharModal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</transition>
+
 
       <!-- MODAL PERFIL -->
       <transition name="modal">
         <div v-if="showPerfil" class="modal-bg">
           <div class="modal-card">
             <h3 class="modal-title">Editar Perfil</h3>
+            <p v-if="erroEstudante" class="erro-msg">{{ erroEstudante }}</p>
+
             <form @submit.prevent="salvarPerfil">
               <div class="avatar-edit">
                 <label for="foto-perfil">
@@ -222,93 +227,200 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
+const erroEstudante = ref('');
+const erroCpf = ref('');
+const erroEmail = ref('');
 
 const defaultAvatar = "https://ui-avatars.com/api/?background=2db6ff&color=fff&name=U"
 import { reactive, onMounted } from 'vue'
 
-const usuario = reactive({
-  nome: '',
-  email: '',
-  fotoUrl: ''
-})
-onMounted(() => {
-  async function salvarCliente() {
-  // ... (validações aqui)
-  if (!clienteForm.anoId || !clienteForm.turmaId) { alert('Selecione o ano e a turma.'); return }
+async function carregarEstudantes() {
+
+  if (!usuario) return
+  console.log('usuario:', usuario); // <- Veja o valor no console
+console.log('payload:', {
+  nome: clienteForm.nome,
+  cpf: clienteForm.cpf,
+  email: clienteForm.email,
+  data_nascimento: clienteForm.dataNascimento,
+  telefone: clienteForm.telefone,
+  foto_url: clienteForm.fotoUrl,
+  ano_id: clienteForm.anoId,
+  turma_id: clienteForm.turmaId,
+  usuario_id: usuario.id
+});
+
+  const res = await fetch(`http://localhost:8080/estudantes?usuario_id=${usuario.id}`)
+  if (res.ok) {
+    const data = await res.json()
+    clientes.value = data.map(est => ({
+      id: est.id,
+      nome: est.nome,
+      cpf: est.cpf,
+      email: est.email,
+      dataNascimento: est.data_nascimento,
+      telefone: est.telefone,
+      fotoUrl: est.foto_url,
+      anoId: est.ano_id,
+      turmaId: est.turma_id,
+    }))
+  }
+}
+async function salvarEstudante() {
+  // Se for edição
+  if (editando.value && clienteForm.id) {
+    try {
+      const res = await fetch(`http://localhost:8080/estudantes/${clienteForm.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome: clienteForm.nome,
+          cpf: clienteForm.cpf,
+          email: clienteForm.email,
+          data_nascimento: clienteForm.dataNascimento,
+          telefone: clienteForm.telefone,
+          foto_url: clienteForm.fotoUrl,
+          ano_id: clienteForm.anoId,
+          turma_id: clienteForm.turmaId,
+          usuario_id: clienteForm.usuario_id
+        })
+      });
+      if (!res.ok) {
+  const msg = await res.text();
+  if (res.status === 409) {
+  erroEstudante.value = msg; // mostra a mensagem bonita
+} else {
+  erroEstudante.value = "Erro ao atualizar estudante";
+}
+
+  return;
+}
+
+      await carregarEstudantes();
+      fecharModal();
+    } catch (err) {
+      alert("Erro ao atualizar estudante");
+    }
+    return;
+  }
+
+  // Se for novo cadastro...
+  // (Seu código atual de cadastro, método POST)
+}
+
+async function salvarCliente() {
+  erroEstudante.value = ''; // Sempre começa limpando o erro
+
+  // Validação de ano/turma
+  if (!clienteForm.anoId || !clienteForm.turmaId) {
+    erroEstudante.value = 'Selecione o ano e a turma.';
+    return;
+  }
 
   try {
-    const usuario = JSON.parse(localStorage.getItem('usuario'))
-    const res = await fetch('http://localhost:8080/estudantes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nome: clienteForm.nome,
-        cpf: clienteForm.cpf,
-        email: clienteForm.email,
-        data_nascimento: clienteForm.dataNascimento,
-        telefone: clienteForm.telefone,
-        foto_url: clienteForm.fotoUrl,
-        ano_id: clienteForm.anoId,
-        turma_id: clienteForm.turmaId,
-        usuario_id: usuario.id
-      })
-    });
+    let res;
+    const payload = {
+      nome: clienteForm.nome,
+      cpf: clienteForm.cpf,
+      email: clienteForm.email,
+      data_nascimento: clienteForm.dataNascimento,
+      telefone: clienteForm.telefone,
+      foto_url: clienteForm.fotoUrl,
+      ano_id: clienteForm.anoId,
+      turma_id: clienteForm.turmaId,
+      usuario_id: usuario.id
+    };
 
-    if (!res.ok) {
-      throw new Error("Erro ao cadastrar estudante");
+    if (editando.value && clienteForm.id) {
+      // Atualizar estudante (PUT)
+      res = await fetch(`http://localhost:8080/estudantes/${clienteForm.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      // Cadastrar novo estudante (POST)
+      res = await fetch('http://localhost:8080/estudantes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
     }
-    // Atualiza lista de estudantes do banco após cadastrar
-    await carregarEstudantes()
-    fecharModal()
+    const msg = await res.text();
+if (!res.ok) {
+  if (msg.includes('E-mail já cadastrado')) {
+    erroEmail.value = msg;
+    erroCpf.value = '';
+  } else if (msg.includes('CPF já cadastrado')) {
+    erroCpf.value = msg;
+    erroEmail.value = '';
+  } else {
+    erroEmail.value = '';
+    erroCpf.value = '';
+    erroEstudante.value = "Erro ao salvar estudante";
+  }
+  return;
+}
+
+
+    await carregarEstudantes();
+    fecharModal();
+    erroEstudante.value = '';
   } catch (err) {
-    alert('Erro ao cadastrar estudante');
+    erroEstudante.value = err.message || 'Erro ao salvar estudante';
   }
 }
 
-  // Só roda no navegador
-  if (typeof window !== 'undefined') {
-    const salvo = localStorage.getItem('usuario')
-    if (salvo) {
-      const u = JSON.parse(salvo)
-      usuario.nome = u.nome || ''
-      usuario.email = u.email || ''
-      usuario.fotoUrl = u.fotoUrl || ''
-    }
-  }
-})
-const cadastrarEstudante = async () => {
-  const usuario = JSON.parse(localStorage.getItem('usuario'))
 
-  if (!usuario) {
-    alert("Usuário não logado")
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const usuario = reactive({
+  id: Number(route.query.id) || null,
+  nome: route.query.nome || '',
+  email: route.query.email || '',
+  fotoUrl: route.query.fotoUrl || ''
+})
+
+// Verifica se o ID realmente veio
+if (!usuario.id) {
+  alert('Usuário não identificado.')
+}
+
+onMounted(async () => {
+  
+  const id = route.query.id
+
+  if (!id) {
+    alert("Usuário não identificado.")
     return
   }
 
   try {
-    const res = await fetch('http://localhost:8080/estudantes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nome: novoAluno.nome,
-        email: novoAluno.email,
-        telefone: novoAluno.telefone,
-        usuario_id: usuario.id
-      })
-    })
+    const res = await fetch(`http://localhost:8080/usuario?id=${id}`)
 
-    if (!res.ok) {
-      alert("Erro ao cadastrar aluno")
-      return
-    }
+    if (!res.ok) throw new Error("Erro ao buscar usuário")
 
-    alert("Aluno cadastrado com sucesso!")
-    fecharPopups()
-    carregarEstudantes() // se tiver um método pra atualizar a lista
-  } catch (e) {
-    console.error("Erro:", e)
-    alert("Erro ao cadastrar")
+    const data = await res.json()
+    console.log('dados do usuário carregado:', data)
+    console.log('route.query:', route.query)
+
+
+    usuario.id = data.id
+    usuario.nome = data.nome
+    usuario.email = data.email
+    usuario.fotoUrl = data.foto_url || ''
+    
+    await carregarEstudantes()
+  } catch (err) {
+    console.error("Erro ao carregar dados do usuário:", err)
+    alert("Erro ao carregar dados do usuário")
   }
-}
+})
+
+
 
 function limparCpf() {
   clienteForm.cpf = clienteForm.cpf.replace(/\D/g, '').slice(0,11)
@@ -354,15 +466,23 @@ const turmas = ref([
   { id: 3, nome: 'A', anoId: 2 },
 ])
 
-const clientes = ref([
-  { id: 2, nome: 'João Silva', cpf: '12345678900', email: 'joao@exemplo.com', dataNascimento: '2011-08-09', telefone: '41999991234', fotoUrl: "", anoId: 1, turmaId: 1 },
-  { id: 3, nome: 'Maria Costa', cpf: '45678912300', email: 'maria@exemplo.com', dataNascimento: '2010-05-17', telefone: '', fotoUrl: "", anoId: 2, turmaId: 3 }
-])
+const clientes = ref([])
+
 
 const dropdownAnoAberto = ref(false)
 const dropdownTurmaAberto = ref(false)
 const showPerfil = ref(false)
 const showConfirmarLogout = ref(false)
+const showConfirmarExcluir = ref(false)
+const estudanteExcluir = ref(null)
+
+function abrirConfirmarExcluir(estudante) {
+  estudanteExcluir.value = estudante
+  showConfirmarExcluir.value = true
+}
+function cancelarExcluir() {
+  showConfirmarExcluir.value = false
+}
 
 function toggleDropdown(tipo) {
   if (tipo === 'ano') {
@@ -414,8 +534,7 @@ const showModal = ref(false)
 const editando = ref(false)
 const clienteForm = reactive({ id: null, nome: '', cpf: '', email: '', dataNascimento: '', telefone: '', fotoUrl: "", anoId: null, turmaId: null })
 const erroNome = ref('')
-const erroCpf = ref('')
-const erroEmail = ref('')
+
 const erroDataNascimento = ref('')
 const erroTelefone = ref('')
 
@@ -471,42 +590,6 @@ const emailsPermitidos = [
   '@yahoo.com.br',
   '@uol.com.br'
 ]
-
-function salvarCliente() {
-  erroNome.value = ''
-  erroCpf.value = ''
-  erroEmail.value = ''
-  erroDataNascimento.value = ''
-  erroTelefone.value = ''
-
-  if (!clienteForm.nome) { erroNome.value = 'Informe o nome.'; return }
-  if (!clienteForm.cpf) { erroCpf.value = 'Informe o CPF.'; return }
-  if (!validarCpf(clienteForm.cpf)) { erroCpf.value = 'CPF inválido.'; return }
-  if (clientes.value.some(c => c.cpf === clienteForm.cpf && c.id !== clienteForm.id)) { erroCpf.value = 'CPF já cadastrado.'; return }
-  if (clientes.value.some(c => c.email === clienteForm.email && c.id !== clienteForm.id)) { erroEmail.value = 'E-mail já cadastrado.'; return }
-  if (!clienteForm.email) { erroEmail.value = 'Informe o e-mail.'; return }
-  const dominioValido = emailsPermitidos.some(d =>
-  clienteForm.email.toLowerCase().endsWith(d)
-)
-if (!dominioValido) {
-  erroEmail.value = 'Por favor, utilize um endereço de e-mail válido!';
-  return;
-}
-
-  if (!clienteForm.dataNascimento) { erroDataNascimento.value = 'Informe a data de nascimento.'; return }
-  if (clienteForm.telefone && clienteForm.telefone.replace(/\D/g, '').length > 0 && clienteForm.telefone.replace(/\D/g, '').length < 6) { erroTelefone.value = 'O telefone deve ter pelo menos 6 dígitos.'; return }
-  if (!clienteForm.anoId || !clienteForm.turmaId) { alert('Selecione o ano e a turma.'); return }
-
-  if (editando.value) {
-    const idx = clientes.value.findIndex(c => c.id === clienteForm.id)
-    if (idx !== -1) clientes.value[idx] = { ...clienteForm }
-  } else {
-    clientes.value.unshift({ ...clienteForm, id: Date.now() })
-  }
-  fecharModal()
-  
-}
-
 // FOTO
 function onFotoEstudanteChange(e) {
   const file = e.target.files[0]
@@ -582,8 +665,6 @@ function salvarPerfil() {
   usuario.email = perfilForm.email
   usuario.fotoUrl = perfilForm.fotoUrl
 
-  // Salva no localStorage para persistir
-  localStorage.setItem('usuario', JSON.stringify(usuario))
     // Fecha o modal de perfil
   showPerfil.value = false
 
@@ -603,16 +684,19 @@ function dispararInputPerfil() {
 }
 
 // --- EXCLUIR CLIENTE --- //
-const showConfirmarExcluir = ref(false)
-const estudanteExcluir = ref(null)
-function abrirConfirmarExcluir(estudante) {
-  estudanteExcluir.value = estudante
-  showConfirmarExcluir.value = true
-}
-function cancelarExcluir() { showConfirmarExcluir.value = false }
-function confirmarExcluir() {
-  clientes.value = clientes.value.filter(c => c.id !== estudanteExcluir.value.id)
-  cancelarExcluir()
+async function confirmarExcluir() {
+  try {
+    const res = await fetch(`http://localhost:8080/estudantes/${estudanteExcluir.value.id}`, {
+      method: 'DELETE'
+    })
+
+    if (!res.ok) throw new Error('Erro ao excluir')
+
+    clientes.value = clientes.value.filter(c => c.id !== estudanteExcluir.value.id)
+    cancelarExcluir()
+  } catch (err) {
+    alert('Erro ao excluir estudante')
+  }
 }
 
 // --- LOGOUT --- //
@@ -964,5 +1048,14 @@ function sairConta() {
 .clientes-table tbody td:last-child {
   text-align: center !important;
 }
+.erro-msg {
+  color: #ff6a6a;
+  font-size: 0.99rem;
+  margin: 2px 0 8px 2px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  /* você pode ajustar mais coisas aqui! */
+}
+
 
 </style>

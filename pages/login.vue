@@ -127,31 +127,41 @@ const login = async () => {
       body: JSON.stringify({ email: email.value, senha: senha.value })
     })
 
-    if (res.ok) {
-      const data = await res.json()
-      // Salva dados do usuário autenticado no localStorage
-      localStorage.setItem('usuario', JSON.stringify({
-        id: data.id,
-        email: data.email,
-        nome: data.nome || 'Usuário'
-      }))
-      ok.value = true
-      senhaErro.value = ''
-      // Redireciona após 1,1 segundos para o dashboard
-      setTimeout(() => router.push('/dashboard'), 1100)
-    } else {
-      // Mensagem padrão de erro (credenciais inválidas)
-      senhaErro.value = 'E-mail ou senha incorretos.'
-      ok.value = false
-    }
-  } catch (e) {
-    // Erro na requisição (falha de conexão, etc)
-    senhaErro.value = 'E-mail ou senha incorretos.'
+if (res.ok) {
+  const data = await res.json()
+  ok.value = true
+  senhaErro.value = ''
+
+  // Verifica se os dados essenciais do usuário foram retornados
+  if (data.id && data.nome && data.email) {
+    setTimeout(() => {
+      router.push({
+        path: '/dashboard',
+        query: {
+          id: data.id,
+          nome: data.nome,
+          email: data.email,
+          fotoUrl: data.fotoUrl || ''
+        }
+      })
+    }, 100) // delay de 100ms para garantir carregamento suave
+  } else {
+    senhaErro.value = 'Erro ao carregar dados do usuário.'
     ok.value = false
   }
+} else {
+  senhaErro.value = 'E-mail ou senha incorretos.'
+  ok.value = false
+}
+  } catch (e) {
+    senhaErro.value = 'Erro ao conectar com o servidor.'
+    ok.value = false
+  }
+
   loading.value = false
 }
 </script>
+
 
 <style scoped>
 /* 
