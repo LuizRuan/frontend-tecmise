@@ -306,17 +306,12 @@ async function salvarEstudante() {
   }
 
   // Se for novo cadastro...
-  // (Seu código atual de cadastro, método POST)
 }
 
 async function salvarCliente() {
   erroEstudante.value = ''; // Sempre começa limpando o erro
 
-  // Validação de ano/turma
-  if (!clienteForm.anoId || !clienteForm.turmaId) {
-    erroEstudante.value = 'Selecione o ano e a turma.';
-    return;
-  }
+ 
 
   try {
     let res;

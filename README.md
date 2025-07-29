@@ -1,12 +1,28 @@
-# Nuxt Minimal Starter
+# Nuxt Minimal Starter + Go Backend
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+See the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
-## Setup
+## ⚠️ Atenção
 
-Make sure to install dependencies:
+> **Este frontend depende do backend em Go rodando em http://localhost:8080**  
+> Certifique-se de rodar o backend ANTES de iniciar o frontend.
+
+## Backend — Como rodar
+
+1. Instale o Go e o PostgreSQL, configure conforme seu ambiente.
+2. No terminal, entre na pasta do backend e execute:
 
 ```bash
+cd backend
+go run .
+O backend ficará disponível em http://localhost:8080.
+
+Frontend — Setup
+Make sure to install dependencies:
+
+bash
+Copiar
+Editar
 # npm
 npm install
 
@@ -18,13 +34,12 @@ yarn install
 
 # bun
 bun install
-```
+Development Server
+Start the development server on http://localhost:3000:
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
+bash
+Copiar
+Editar
 # npm
 npm run dev
 
@@ -36,13 +51,12 @@ yarn dev
 
 # bun
 bun run dev
-```
-
-## Production
-
+Production
 Build the application for production:
 
-```bash
+bash
+Copiar
+Editar
 # npm
 npm run build
 
@@ -54,11 +68,11 @@ yarn build
 
 # bun
 bun run build
-```
-
 Locally preview production build:
 
-```bash
+bash
+Copiar
+Editar
 # npm
 npm run preview
 
@@ -70,6 +84,14 @@ yarn preview
 
 # bun
 bun run preview
-```
+Check out the deployment documentation for more information.
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+markdown
+Copiar
+Editar
+
+**Resumindo:**  
+- Siga o mesmo modelo clean  
+- Destaque logo no começo sobre rodar o backend  
+- Inclua o passo do Go  
+- Resto igual ao template Nuxt.
