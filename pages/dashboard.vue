@@ -232,6 +232,7 @@
 
 <script setup>
 const { $api } = useNuxtApp()
+
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

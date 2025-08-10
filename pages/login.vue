@@ -73,8 +73,6 @@
 </template>
 
 <script setup>
-const { $api } = useNuxtApp()
-
 /**
  * Página de Login — TecMise
  * - Valida campos de e-mail e senha
