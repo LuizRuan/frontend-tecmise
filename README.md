@@ -1,97 +1,155 @@
-# Nuxt Minimal Starter + Go Backend
+# TecMise — Sistema Completo de Gestão Escolar
 
-See the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Bem-vindo ao **TecMise**, uma aplicação web moderna para **gestão escolar** com foco em cadastro, listagem, edição e remoção de estudantes, anos/turmas e perfis de usuário.
 
-## ⚠️ Atenção
+Projeto construído utilizando:
+- **Frontend:** Vue 3 com Nuxt.js
+- **Backend:** Go (Golang, API RESTful)
+- **Banco:** PostgreSQL
+- **ORM:** sqlc (sugerido)
+- **Comunicação:** JSON via API REST
 
-> **Este frontend depende do backend em Go rodando em http://localhost:8080**  
-> Certifique-se de rodar o backend ANTES de iniciar o frontend.
+---
 
-## Backend — Como rodar
+## Índice
 
-1. Instale o Go e o PostgreSQL, configure conforme seu ambiente.
-2. No terminal, entre na pasta do backend e execute:
+- [Visão Geral](#visão-geral)
+- [Principais Funcionalidades](#principais-funcionalidades)
+- [Arquitetura do Projeto](#arquitetura-do-projeto)
+- [Demonstração Visual](#demonstração-visual)
+- [Instalação e Execução](#instalação-e-execução)
+- [Padrões e Boas Práticas](#padrões-e-boas-práticas)
+- [Contribuição](#contribuição)
+- [Licença](#licença)
+
+---
+
+## Visão Geral
+
+O **TecMise** foi desenvolvido com foco em **experiência do usuário**, performance e código limpo/documentado. O painel principal (dashboard) permite ao usuário:
+- Visualizar estudantes por Ano/Turma
+- Filtrar, buscar e editar rapidamente informações
+- Utilizar modais amigáveis para todas as ações (cadastro, edição, exclusão, visualização ampliada de fotos, logout e perfil)
+- Interface responsiva, acessível e visualmente agradável
+
+---
+
+## Principais Funcionalidades
+
+- **Listagem de Estudantes** com ordenação, busca e filtros dinâmicos
+- **CRUD Completo** (criar, editar, remover estudantes)
+- **Upload de Foto** (avatar para estudantes e usuário)
+- **Filtros por Ano/Turma** (dropdown customizado e rápido)
+- **Busca Instantânea** (nome/email, com resultados parciais)
+- **Modais Padronizados** para todas as ações (altamente reutilizáveis)
+- **Perfil de Usuário** com edição de nome e foto
+- **Logout Seguro** (modal de confirmação)
+- **Responsividade total** (experiência otimizada para desktop e mobile)
+- **Validação de dados no frontend e backend** (ex: e-mail, CPF, campos obrigatórios)
+- **Documentação extensiva** em todos os componentes Vue
+
+---
+
+## Arquitetura do Projeto
+
+O frontend foi construído em **Vue 3 + Nuxt.js**, e o código é dividido em componentes desacoplados, cada um responsável por uma parte clara da interface:
+
+- `Dashboard.vue` — Página principal, orquestra todos os componentes, mantém o estado global do dashboard.
+- `EstudantesTable.vue` — Tabela de estudantes com ordenação e ações.
+- `FiltrosEstudante.vue` — Filtro por Ano/Turma.
+- `EstudanteModal.vue` — Modal para cadastro/edição de estudante (com upload de foto).
+- `ModalAdicionarAno.vue` — Modal para adicionar novo Ano/Turma.
+- `PerfilModal.vue` — Modal de edição do perfil do usuário.
+- `ConfirmarExclusaoModal.vue` — Modal de confirmação para remover estudante.
+- `ConfirmarLogoutModal.vue` — Modal de confirmação para logout.
+- `AmpliarFotoModal.vue` — Modal para visualizar foto ampliada do estudante.
+
+> Todos os componentes foram **altamente documentados** e seguem boas práticas de UX, acessibilidade, organização e CSS modularizado (scoped).
+
+---
+
+## Instalação e Execução
+
+### Pré-requisitos
+
+- **Node.js:** v22.17.1 ou superior  
+- **npm:** (ou yarn, mas usei npm)
+- **Go:** v1.20 ou superior (recomendado para rodar o backend)
+- **PostgreSQL:** 12+  
+- **sqlc:** para geração do código do ORM no backend
+
+### Como rodar o projeto
+
+#### 1. Clone o repositório
 
 ```bash
-cd backend
-go run .
-O backend ficará disponível em http://localhost:8080.
+git clone https://github.com/seu-usuario/tecmise.git
+cd tecmise
+````
 
-Frontend — Setup
-Make sure to install dependencies:
+#### 2. Instale as dependências do frontend
 
-bash
-Copiar
-Editar
-# npm
+```bash
+cd frontend
 npm install
+```
 
-# pnpm
-pnpm install
+#### 3. Rode o frontend (modo dev)
 
-# yarn
-yarn install
-
-# bun
-bun install
-Development Server
-Start the development server on http://localhost:3000:
-
-bash
-Copiar
-Editar
-# npm
+```bash
 npm run dev
+```
 
-# pnpm
-pnpm dev
+Acesse: [http://localhost:3000](http://localhost:3000)
 
-# yarn
-yarn dev
+#### 4. Configure o backend
 
-# bun
-bun run dev
-Production
-Build the application for production:
+* Configure variáveis de ambiente do banco (`.env`)
+* Gere o código sqlc (ORM)
+* Rode o servidor Go
 
-bash
-Copiar
-Editar
-# npm
-npm run build
+```bash
+cd ../backend
+go run main.go
+```
 
-# pnpm
-pnpm build
+O backend sobe por padrão em: [http://localhost:8080](http://localhost:8080)
 
-# yarn
-yarn build
+#### 5. Banco de dados
 
-# bun
-bun run build
-Locally preview production build:
+* Crie um banco PostgreSQL, configure os dados de acesso em `.env`
+* Execute as migrations/tabelas necessárias (sql fornecido na pasta `/db/migrations` ou conforme modelo no projeto)
 
-bash
-Copiar
-Editar
-# npm
-npm run preview
+---
 
-# pnpm
-pnpm preview
+## Padrões e Boas Práticas
 
-# yarn
-yarn preview
+* **Componentização máxima:** cada modal, filtro e tabela é um Vue Component isolado
+* **CSS scoped**: estilos 100% encapsulados
+* **Documentação em todos os arquivos Vue** (comentários de props, emits, UX, manutenção)
+* **UX/Acessibilidade:** modais centralizados, uso de ARIA, foco visual, botões grandes
+* **Validação em camada dupla:** tanto frontend quanto backend validam campos críticos
 
-# bun
-bun run preview
-Check out the deployment documentation for more information.
+---
 
-markdown
-Copiar
-Editar
+## Como contribuir
 
-**Resumindo:**  
-- Siga o mesmo modelo clean  
-- Destaque logo no começo sobre rodar o backend  
-- Inclua o passo do Go  
-- Resto igual ao template Nuxt.
+Pull requests e sugestões são bem-vindos!
+Se encontrar bugs, melhorias ou ideias, abra uma issue ou mande um PR.
+
+---
+
+## Licença
+
+Este projeto está sob a licença MIT — veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+---
+
+## Sobre o autor
+
+Desenvolvido por \[Luiz Ruan]
+Contato: \[[Gmail](mailto:ruansiqueiraandrade@email.com)] | [LinkedIn](https://linkedin.com/in/LuizRuan)
+
+---
+
+> Projeto criado para avaliação técnica, **com foco em código limpo, usabilidade e documentação**.

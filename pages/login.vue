@@ -1,36 +1,58 @@
 <template>
-  <!-- Container centralizado para o formulário de login -->
   <div class="center">
-    <!-- Card do formulário -->
+    <!-- Formulário de login -->
     <form class="card" @submit.prevent="login" novalidate>
-      <h1 class="brand">TecMise</h1>
-      <h2>Entrar</h2>
+      <!-- Marca e título -->
+<img src="/ICON.png" alt="Logo Tecmise" class="logo-img" />
+
+      <h2>Login</h2>
 
       <!-- Campo de E-mail -->
       <div class="input-group">
         <input
-          v-model="email"
-          type="email"
+          v-model.trim="email"
+          type="text"
           placeholder="Digite seu e-mail"
           :class="{ errorinput: emailErro }"
           @focus="clearErro('email')"
+          @input="validarEmail"
           required
           autocomplete="off"
         />
         <p v-if="emailErro" class="erro">{{ emailErro }}</p>
       </div>
 
-      <!-- Campo de Senha -->
-      <div class="input-group">
+      <!-- Campo de Senha + Botão Olho -->
+      <div class="input-group senha-group">
         <input
-          v-model="senha"
-          type="password"
+          v-model.trim="senha"
+          :type="mostrarSenha ? 'text' : 'password'"
           placeholder="Digite sua senha"
           :class="{ errorinput: senhaErro }"
           @focus="clearErro('senha')"
+          @input="validarSenha"
           required
           autocomplete="off"
         />
+        <button
+          type="button"
+          class="olho-btn"
+          @click="mostrarSenha = !mostrarSenha"
+          :aria-label="mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'"
+          tabindex="-1"
+        >
+          <!-- Ícones olho -->
+          <svg v-if="!mostrarSenha" xmlns="http://www.w3.org/2000/svg" height="1.35em" viewBox="0 0 24 24" fill="none" stroke="#36c0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M2.05 12C3.45 7.36 7.44 4 12 4s8.55 3.36 9.95 8c-1.4 4.64-5.39 8-9.95 8s-8.55-3.36-9.95-8z"/>
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" height="1.35em" viewBox="0 0 24 24" fill="none" stroke="#36c0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.94 17.94A10.06 10.06 0 0 1 12 20c-4.56 0-8.55-3.36-9.95-8a10.11 10.11 0 0 1 1.67-2.95"/>
+            <path d="M6.12 6.12A10.05 10.05 0 0 1 12 4c4.56 0 8.55 3.36 9.95 8-.43 1.44-1.14 2.77-2.09 3.91"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
         <p v-if="senhaErro" class="erro">{{ senhaErro }}</p>
       </div>
 
@@ -39,9 +61,9 @@
         <span v-if="loading">Entrando...</span>
         <span v-else>Entrar</span>
       </button>
-      <!-- Mensagem de sucesso -->
+
+      <!-- Mensagens de feedback -->
       <p v-if="ok" class="ok">Login realizado! Redirecionando...</p>
-      <!-- Link para cadastro -->
       <p class="register-link">
         Não tem conta?
         <NuxtLink to="/register">Cadastre-se</NuxtLink>
@@ -52,123 +74,122 @@
 
 <script setup>
 /**
- * Script utilizando Composition API (Vue 3)
- * Funções e variáveis para o login de usuário
+ * Página de Login — TecMise
+ * - Valida campos de e-mail e senha
+ * - Envia requisição POST para o backend
+ * - Redireciona para o dashboard em caso de sucesso
+ * - Exibe mensagens de erro do backend (quando disponíveis)
  */
-
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
-// Instância do roteador Vue Router
 const router = useRouter()
 
-/**
- * onMounted: adiciona fonte Montserrat ao head do documento ao montar o componente
- */
+// Estado dos campos e mensagens
+const email = ref('')
+const senha = ref('')
+const emailErro = ref('')
+const senhaErro = ref('')
+const mostrarSenha = ref(false)
+const ok = ref(false)
+const loading = ref(false)
+
+/* ==========================
+   Funções de Validação
+========================== */
+function validarEmail() {
+  if (!email.value) {
+    emailErro.value = 'O e-mail é obrigatório.'
+  } else if (/\s/.test(email.value)) {
+    emailErro.value = 'O e-mail não pode conter espaços.'
+  } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email.value)) {
+    emailErro.value = 'Digite um e-mail válido.'
+  } else {
+    emailErro.value = ''
+  }
+}
+
+function validarSenha() {
+  if (!senha.value) {
+    senhaErro.value = 'A senha é obrigatória.'
+  } else if (senha.value.length < 8) {
+    senhaErro.value = 'A senha deve ter no mínimo 8 caracteres.'
+  } else if (/\s/.test(senha.value)) {
+    senhaErro.value = 'A senha não pode conter espaços.'
+  } else {
+    senhaErro.value = ''
+  }
+}
+
+function clearErro(field) {
+  if (field === 'email') emailErro.value = ''
+  if (field === 'senha') senhaErro.value = ''
+}
+
+/* ==========================
+   Ações
+========================== */
 onMounted(() => {
+  // Carregar fonte de forma programática
   const link = document.createElement('link')
   link.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap'
   link.rel = 'stylesheet'
   document.head.appendChild(link)
 })
 
-// Estados reativos para campos e status
-const email = ref('')         // E-mail do usuário
-const senha = ref('')         // Senha do usuário
-const ok = ref(false)         // Status de login realizado
-const loading = ref(false)    // Status de carregamento do login
-const emailErro = ref('')     // Erro relacionado ao campo de e-mail
-const senhaErro = ref('')     // Erro relacionado ao campo de senha
-
-/**
- * Limpa a mensagem de erro do campo ao focar
- * @param {string} field - Nome do campo a ser limpo ('email' ou 'senha')
- */
-function clearErro(field) {
-  if (field === 'email') emailErro.value = ''
-  if (field === 'senha') senhaErro.value = ''
-}
-
-/**
- * Função de login, chamada ao submeter o formulário
- * Faz validação dos campos, chama backend e trata respostas
- */
 const login = async () => {
-  // Limpa erros anteriores
-  emailErro.value = ''
-  senhaErro.value = ''
+  validarEmail()
+  validarSenha()
   ok.value = false
-  let hasError = false
 
-  // Validação do e-mail
-  if (!email.value) {
-    emailErro.value = 'O e-mail é obrigatório.'
-    hasError = true
-  } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email.value)) {
-    emailErro.value = 'Digite um e-mail válido.'
-    hasError = true
-  }
-  // Validação da senha
-  if (!senha.value) {
-    senhaErro.value = 'A senha é obrigatória.'
-    hasError = true
-  } else if (senha.value.length < 8) {
-    senhaErro.value = 'A senha deve ter no mínimo 8 caracteres.'
-    hasError = true
-  }
-  if (hasError) return
+  if (emailErro.value || senhaErro.value) return
 
   loading.value = true
   try {
-    // Chama a rota /login do backend com método POST
     const res = await fetch('http://localhost:8080/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value, senha: senha.value })
+      body: JSON.stringify({
+        email: email.value,
+        senha: senha.value
+      })
     })
 
-if (res.ok) {
-  const data = await res.json()
-  ok.value = true
-  senhaErro.value = ''
+    const data = await res.json().catch(() => ({}))
 
-  // Verifica se os dados essenciais do usuário foram retornados
-  if (data.id && data.nome && data.email) {
-    setTimeout(() => {
-      router.push({
-        path: '/dashboard',
-        query: {
-          id: data.id,
-          nome: data.nome,
-          email: data.email,
-          fotoUrl: data.fotoUrl || ''
-        }
-      })
-    }, 100) // delay de 100ms para garantir carregamento suave
-  } else {
-    senhaErro.value = 'Erro ao carregar dados do usuário.'
-    ok.value = false
-  }
-} else {
-  senhaErro.value = 'E-mail ou senha incorretos.'
-  ok.value = false
-}
+    if (res.ok) {
+      ok.value = true
+      senhaErro.value = ''
+      // Se o backend retorna dados válidos
+      if (data.id && data.nome && data.email) {
+        setTimeout(() => {
+          router.push({
+            path: '/dashboard',
+            query: { email: data.email }
+          })
+        }, 200)
+      } else {
+        senhaErro.value = 'Erro ao carregar dados do usuário.'
+        ok.value = false
+      }
+    } else {
+      senhaErro.value = data?.error || 'E-mail ou senha incorretos.'
+      ok.value = false
+    }
   } catch (e) {
     senhaErro.value = 'Erro ao conectar com o servidor.'
     ok.value = false
   }
-
   loading.value = false
 }
 </script>
 
-
 <style scoped>
-/* 
-  Estilos do componente de login 
-  - Layout centralizado, card com efeito de sombra, cores, transições
-  - Responsividade para largura máxima
-*/
+.logo-img {
+  width: 290px;
+  height: auto;
+}
+
 .center {
   min-height: 100vh;
   display: flex;
@@ -210,6 +231,10 @@ h2 {
 .input-group {
   width: 100%;
   margin-bottom: 18px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 input {
   display: block;
@@ -234,7 +259,7 @@ input:focus {
   border: 1.8px solid #ff4a4a;
   background: #331c1c;
 }
-button {
+button[type="submit"] {
   width: 100%;
   padding: 0.86rem 0;
   border-radius: 8px;
@@ -244,7 +269,7 @@ button {
   box-shadow: 0 2px 18px #19345a44;
   font-family: 'Montserrat', Arial, sans-serif;
 }
-button:hover:enabled {
+button[type="submit"]:hover:enabled {
   background: linear-gradient(90deg, #43c8ff 30%, #4185e6 100%);
   transform: scale(1.04);
   box-shadow: 0 8px 28px #0a355f60;
@@ -264,4 +289,46 @@ button:disabled { opacity: .7; cursor: wait; }
 .register-link { margin-top: 18px; font-size: 1.09rem; color: #c8e4ff; }
 .register-link a { color: #2db6ff; transition: color .18s; }
 .register-link a:hover { color: #fff; text-shadow: 0 0 8px #2db6ff80; }
+
+/* ========== Olho de mostrar senha ========== */
+.senha-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.senha-group input {
+  padding-right: 44px !important;
+}
+.olho-btn {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 1.3rem;
+  color: #36c0ff;
+  cursor: pointer;
+  padding: 0 2px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  transition: color .17s;
+}
+.olho-btn:hover { color: #24a7e6; }
+
+.input-group .erro {
+  position: absolute;
+  left: 3px;
+  bottom: -21px;
+  width: calc(100% - 6px);
+  margin: 0;
+  padding: 0;
+  font-size: 0.97rem;
+  color: #ff5b5b;
+  text-align: left;
+  transition: opacity .2s;
+  pointer-events: none;
+}
 </style>

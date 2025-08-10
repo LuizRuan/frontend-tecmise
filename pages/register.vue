@@ -1,11 +1,11 @@
 <template>
-  <!-- Container centralizado para o formulário de registro -->
   <div class="center">
-    <!-- Card com o formulário -->
     <form class="card" @submit.prevent="cadastrar" novalidate>
-      <h1 class="brand">TecMise</h1>
+      <!-- Marca e título -->
+      <img src="/ICON.png" alt="Logo Tecmise" class="logo-img" />
       <h2>Criar conta</h2>
-      <!-- Campo Nome completo -->
+
+      <!-- Campo Nome -->
       <div class="input-group">
         <input
           v-model="nome"
@@ -15,58 +15,95 @@
           autocomplete="off"
         />
       </div>
-      <!-- Campo E-mail, com validação visual ao perder foco -->
+
+      <!-- Campo E-mail -->
       <div class="input-group">
         <input
           v-model="email"
-          type="email"
+          type="text"
           placeholder="Digite seu e-mail"
-          :class="{ errorinput: emailErro && !emailFocus }"
-          @blur="() => { emailFocus = false; validarEmail() }"
-          @focus="emailFocus = true"
+          :class="{ errorinput: emailErro }"
+          @blur="validarEmail"
+          @input="validarEmail"
           required
           autocomplete="off"
         />
-        <p v-if="emailErro && !emailFocus" class="erro">{{ emailErro }}</p>
+        <p v-if="emailErro" class="erro">{{ emailErro }}</p>
       </div>
-      <!-- Campo Senha, com validação visual ao perder foco -->
-      <div class="input-group">
+
+      <!-- Campo Senha com botão Olho -->
+      <div class="input-group senha-group">
         <input
           v-model="senha"
-          type="password"
+          :type="mostrarSenha ? 'text' : 'password'"
           placeholder="Crie sua senha"
-          :class="{ errorinput: senhaErro && !senhaFocus }"
-          @blur="() => { senhaFocus = false; validarSenha() }"
-          @focus="senhaFocus = true"
+          :class="{ errorinput: senhaErro }"
+          @blur="validarSenha"
           required
           autocomplete="off"
         />
-        <p v-if="senhaErro && !senhaFocus" class="erro">{{ senhaErro }}</p>
+        <button
+          type="button"
+          class="olho-btn"
+          @click="mostrarSenha = !mostrarSenha"
+          :aria-label="mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'"
+          tabindex="-1"
+        >
+          <!-- Olho aberto/fechado (SVG) -->
+          <svg v-if="!mostrarSenha" xmlns="http://www.w3.org/2000/svg" height="1.34em" viewBox="0 0 24 24" fill="none" stroke="#36c0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M2.05 12C3.45 7.36 7.44 4 12 4s8.55 3.36 9.95 8c-1.4 4.64-5.39 8-9.95 8s-8.55-3.36-9.95-8z"/>
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" height="1.34em" viewBox="0 0 24 24" fill="none" stroke="#36c0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.94 17.94A10.06 10.06 0 0 1 12 20c-4.56 0-8.55-3.36-9.95-8a10.11 10.11 0 0 1 1.67-2.95"/>
+            <path d="M6.12 6.12A10.05 10.05 0 0 1 12 4c4.56 0 8.55 3.36 9.95 8-.43 1.44-1.14 2.77-2.09 3.91"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+        <p v-if="senhaErro" class="erro">{{ senhaErro }}</p>
       </div>
-      <!-- Campo Confirmação de Senha, com validação visual ao perder foco -->
-      <div class="input-group">
+
+      <!-- Campo Confirmar Senha com botão Olho -->
+      <div class="input-group senha-group">
         <input
           v-model="confirmaSenha"
-          type="password"
+          :type="mostrarConfirmaSenha ? 'text' : 'password'"
           placeholder="Confirme sua senha"
-          :class="{ errorinput: confirmaSenhaErro && !confirmaSenhaFocus }"
-          @blur="() => { confirmaSenhaFocus = false; validarConfirmaSenha() }"
-          @focus="confirmaSenhaFocus = true"
+          :class="{ errorinput: confirmaSenhaErro }"
+          @blur="validarConfirmaSenha"
           required
           autocomplete="off"
         />
-        <p v-if="confirmaSenhaErro && !confirmaSenhaFocus" class="erro">{{ confirmaSenhaErro }}</p>
+        <button
+          type="button"
+          class="olho-btn"
+          @click="mostrarConfirmaSenha = !mostrarConfirmaSenha"
+          :aria-label="mostrarConfirmaSenha ? 'Ocultar senha' : 'Mostrar senha'"
+          tabindex="-1"
+        >
+          <!-- Olho aberto/fechado (SVG) -->
+          <svg v-if="!mostrarConfirmaSenha" xmlns="http://www.w3.org/2000/svg" height="1.34em" viewBox="0 0 24 24" fill="none" stroke="#36c0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M2.05 12C3.45 7.36 7.44 4 12 4s8.55 3.36 9.95 8c-1.4 4.64-5.39 8-9.95 8s-8.55-3.36-9.95-8z"/>
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" height="1.34em" viewBox="0 0 24 24" fill="none" stroke="#36c0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.94 17.94A10.06 10.06 0 0 1 12 20c-4.56 0-8.55-3.36-9.95-8a10.11 10.11 0 0 1 1.67-2.95"/>
+            <path d="M6.12 6.12A10.05 10.05 0 0 1 12 4c4.56 0 8.55 3.36 9.95 8-.43 1.44-1.14 2.77-2.09 3.91"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+        <p v-if="confirmaSenhaErro" class="erro">{{ confirmaSenhaErro }}</p>
       </div>
-      <!-- Botão de cadastro, desabilitado durante loading -->
+
+      <!-- Botão principal -->
       <button type="submit" :disabled="loading">
         <span v-if="loading">Cadastrando...</span>
         <span v-else>Cadastrar</span>
       </button>
-      <!-- Mensagem de erro geral -->
       <p v-if="erro" class="erro">{{ erro }}</p>
-      <!-- Mensagem de sucesso -->
       <p v-if="ok" class="ok">Cadastrado com sucesso! Redirecionando...</p>
-      <!-- Link para login -->
       <p class="login-link">
         Já tem conta? <NuxtLink to="/login">Entrar</NuxtLink>
       </p>
@@ -76,44 +113,35 @@
 
 <script setup>
 /**
- * Script Vue 3 usando Composition API para registro de usuário
- * 
- * Gerencia estados dos campos, validações e integra com o backend
+ * Componente Register (Cadastro) da aplicação TecMise
+ * - Totalmente documentado e padronizado
+ * - Suporte para exibir/ocultar senha (botão olho)
+ * - Validações de campos (e-mail, senha, confirmação)
+ * - Mensagens de erro contextuais
+ * - Envio de dados para backend (/register)
  */
 
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
-// Instância do roteador Vue Router
+// Campos do formulário e estados reativos
+const nome = ref('')
+const email = ref('')
+const senha = ref('')
+const confirmaSenha = ref('')
+const erro = ref('')
+const ok = ref(false)
+const loading = ref(false)
+const emailErro = ref('')
+const senhaErro = ref('')
+const confirmaSenhaErro = ref('')
+const mostrarSenha = ref(false)
+const mostrarConfirmaSenha = ref(false)
+
+// Router para navegação após cadastro
 const router = useRouter()
 
-// Campos do formulário
-const nome = ref('')               // Nome completo do usuário
-const email = ref('')              // E-mail do usuário
-const senha = ref('')              // Senha do usuário
-const confirmaSenha = ref('')      // Confirmação da senha
-
-// Estados de feedback do usuário
-const erro = ref('')               // Mensagem de erro geral
-const ok = ref(false)              // Status de cadastro com sucesso
-const loading = ref(false)         // Status de loading/cadastro em andamento
-
-// Estados de erro de cada campo
-const emailErro = ref('')          // Erro de e-mail
-const senhaErro = ref('')          // Erro de senha
-const confirmaSenhaErro = ref('')  // Erro de confirmação de senha
-
-// Foco dos campos (para UX, só mostra erro ao sair do campo)
-const emailFocus = ref(false)
-const senhaFocus = ref(false)
-const confirmaSenhaFocus = ref(false)
-
-// Estado para controle de campos tocados (pode ser usado em validação adicional)
-let touched = ref(false)
-
-/**
- * Adiciona a fonte Montserrat no carregamento do componente
- */
+// Adiciona fonte Montserrat ao montar componente
 onMounted(() => {
   const link = document.createElement('link')
   link.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap'
@@ -122,13 +150,15 @@ onMounted(() => {
 })
 
 /**
- * Valida o campo de e-mail:
- * - Obrigatório
- * - Regex para formato válido
+ * Validação do campo e-mail
  */
 function validarEmail() {
   if (!email.value) {
     emailErro.value = 'O e-mail é obrigatório.'
+  } else if (email.value !== email.value.trim()) {
+    emailErro.value = 'O e-mail não pode começar ou terminar com espaço.'
+  } else if (/\s/.test(email.value)) {
+    emailErro.value = 'O e-mail não pode conter espaço.'
   } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email.value)) {
     emailErro.value = 'Digite um e-mail válido.'
   } else {
@@ -136,10 +166,9 @@ function validarEmail() {
   }
 }
 
+
 /**
- * Valida o campo de senha:
- * - Obrigatório
- * - Mínimo de 8 caracteres
+ * Validação da senha
  */
 function validarSenha() {
   if (!senha.value) {
@@ -152,9 +181,7 @@ function validarSenha() {
 }
 
 /**
- * Valida o campo de confirmação de senha:
- * - Obrigatório
- * - Deve ser igual à senha
+ * Validação de confirmação de senha
  */
 function validarConfirmaSenha() {
   if (!confirmaSenha.value) {
@@ -167,25 +194,22 @@ function validarConfirmaSenha() {
 }
 
 /**
- * Função principal de cadastro:
- * - Valida os campos
- * - Chama o backend (POST /register)
- * - Mostra mensagens de erro/sucesso e redireciona
+ * Função principal de cadastro
+ * - Valida campos
+ * - Chama backend (/register)
+ * - Exibe erros e sucesso
  */
 const cadastrar = async () => {
-  touched.value = true
   erro.value = ''
   ok.value = false
   validarEmail()
   validarSenha()
   validarConfirmaSenha()
 
-  // Não prossegue se houver erro em algum campo
   if (emailErro.value || senhaErro.value || confirmaSenhaErro.value) return
 
   loading.value = true
   try {
-    // Chama o backend com dados do novo usuário
     const res = await fetch('http://localhost:8080/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -197,25 +221,22 @@ const cadastrar = async () => {
     })
 
     if (res.ok) {
-      // Cadastro OK: exibe mensagem e redireciona
       ok.value = true
       erro.value = ''
       setTimeout(() => router.push('/login'), 1200)
+      nome.value = ''
       email.value = ''
       senha.value = ''
       confirmaSenha.value = ''
     } else if (res.status === 409) {
-      // Backend retornou conflito: e-mail já cadastrado
       erro.value = 'E-mail já cadastrado.'
     } else if (res.status === 400) {
-      // Backend retornou erro de validação
-      erro.value = 'Dados inválidos. Verifique e tente novamente.'
+      const msg = await res.text()
+      erro.value = msg || 'Dados inválidos. Verifique e tente novamente.'
     } else {
-      // Outro erro inesperado
       erro.value = 'Erro ao cadastrar. Tente novamente.'
     }
   } catch (e) {
-    // Falha na requisição ao backend
     erro.value = 'Erro ao cadastrar. Tente novamente.'
   }
   loading.value = false
@@ -223,10 +244,11 @@ const cadastrar = async () => {
 </script>
 
 <style scoped>
-/* 
-  Estilos do componente de registro 
-  - Mesma identidade visual do login: layout, cores, responsividade
-*/
+.logo-img {
+  width: 290px;
+  height: auto;
+}
+
 .center {
   min-height: 100vh;
   display: flex;
@@ -235,7 +257,6 @@ const cadastrar = async () => {
   background: linear-gradient(135deg, #233e6b 70%, #2479cc 100%);
   font-family: 'Montserrat', Arial, sans-serif;
 }
-
 .card {
   background: rgba(35, 55, 110, 0.97);
   border-radius: 22px;
@@ -252,7 +273,6 @@ const cadastrar = async () => {
   align-items: center;
 }
 @keyframes fadein { 0%{opacity:0; transform:translateY(40px);} 100%{opacity:1; transform:translateY(0);} }
-
 .brand {
   color: #2db6ff;
   font-weight: bold;
@@ -270,6 +290,10 @@ h2 {
 .input-group {
   width: 100%;
   margin-bottom: 18px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 input {
   display: block;
@@ -294,7 +318,7 @@ input:focus {
   border: 1.8px solid #ff4a4a;
   background: #331c1c;
 }
-button {
+button[type="submit"] {
   width: 100%;
   padding: 0.86rem 0;
   border-radius: 8px;
@@ -304,7 +328,7 @@ button {
   box-shadow: 0 2px 18px #19345a44;
   font-family: 'Montserrat', Arial, sans-serif;
 }
-button:hover:enabled {
+button[type="submit"]:hover:enabled {
   background: linear-gradient(90deg, #43c8ff 30%, #4185e6 100%);
   transform: scale(1.04);
   box-shadow: 0 8px 28px #0a355f60;
@@ -324,4 +348,48 @@ button:disabled { opacity: .7; cursor: wait; }
 .login-link { margin-top: 18px; font-size: 1.09rem; color: #c8e4ff; }
 .login-link a { color: #2db6ff; transition: color .18s; }
 .login-link a:hover { color: #fff; text-shadow: 0 0 8px #2db6ff80; }
+
+/* ====== Botão Olho Senha ====== */
+.senha-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+}
+.senha-group input {
+  padding-right: 44px !important;
+}
+.olho-btn {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 1.3rem;
+  color: #36c0ff;
+  cursor: pointer;
+  padding: 0 2px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  transition: color .17s;
+}
+.olho-btn:hover { color: #24a7e6; }
+
+/* Garante que erro não empurre o botão olho */
+.input-group .erro {
+  position: absolute;
+  left: 3px;
+  bottom: -21px;
+  width: calc(100% - 6px);
+  margin: 0;
+  padding: 0;
+  font-size: 0.97rem;
+  color: #ff5b5b;
+  text-align: left;
+  transition: opacity .2s;
+  pointer-events: none;
+}
 </style>
