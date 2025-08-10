@@ -48,6 +48,8 @@
 </template>
 
 <script setup>
+const { $api } = useNuxtApp()
+
 /**
  * ModalAdicionarAno.vue
  *

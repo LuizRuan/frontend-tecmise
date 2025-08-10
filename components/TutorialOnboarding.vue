@@ -47,6 +47,8 @@
 </template>
 
 <script setup>
+const { $api } = useNuxtApp()
+
 /**
  * TutorialOnboarding (posicionamento inteligente)
  * - “Anos e Turmas”, “Buscar Estudante”, “Novo Estudante”, “Perfil”

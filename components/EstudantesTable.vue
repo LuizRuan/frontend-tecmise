@@ -113,6 +113,8 @@
 </template>
 
 <script setup>
+const { $api } = useNuxtApp()
+
 import { computed, reactive } from 'vue'
 
 const props = defineProps({

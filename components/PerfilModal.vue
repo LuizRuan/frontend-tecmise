@@ -104,6 +104,8 @@
   </template>
 
   <script setup>
+  const { $api } = useNuxtApp()
+
   /**
    * PerfilModal.vue
    *

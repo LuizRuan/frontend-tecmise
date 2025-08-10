@@ -128,6 +128,8 @@
 </template>
 
 <script setup>
+const { $api } = useNuxtApp()
+
 import { ref, watch, onBeforeUnmount } from 'vue'
 
 const props = defineProps({

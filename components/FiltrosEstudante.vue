@@ -133,6 +133,8 @@
 </template>
 
 <script setup>
+const { $api } = useNuxtApp()
+
 import { ref } from 'vue'
 
 /* -------------------- PROPS -------------------- */

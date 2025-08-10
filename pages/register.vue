@@ -112,6 +112,8 @@
 </template>
 
 <script setup>
+const { $api } = useNuxtApp()
+
 /**
  * Componente Register (Cadastro) da aplicação TecMise
  * - Totalmente documentado e padronizado

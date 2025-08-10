@@ -63,6 +63,8 @@
 </template>
 
 <script setup>
+const { $api } = useNuxtApp()
+
 /**
  * PROPS
  * - show: Boolean (exibe ou não o modal)

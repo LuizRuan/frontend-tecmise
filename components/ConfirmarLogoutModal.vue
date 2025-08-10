@@ -61,6 +61,8 @@
 </template>
 
 <script setup>
+const { $api } = useNuxtApp()
+
 // --- Props ---
 // - show: controla exibição do modal de logout
 const props = defineProps({

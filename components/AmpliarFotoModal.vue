@@ -62,6 +62,8 @@
 </template>
 
 <script setup>
+const { $api } = useNuxtApp()
+
 /**
  * Props esperadas pelo componente:
  * - show: Boolean     // visibilidade do modal
