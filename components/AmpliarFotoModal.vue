@@ -1,41 +1,27 @@
-<!--
-  AmpliarFotoModal.vue
-
-  Modal reutilizável para exibição de foto ampliada de estudante.
-  Muito útil para UX: permite visualizar com mais detalhes o avatar/foto ao clicar na tabela.
-  Recomendado para qualquer sistema que trabalhe com fotos de perfil em lista.
-
-  -----
-  RESPONSABILIDADES:
-    - Exibir foto ampliada de um estudante, junto ao nome e (opcionalmente) o ano/turma.
-    - Permitir fechar o modal ao clicar fora do card central ou no botão "Fechar".
-    - Garantir foco visual (overlay escurecido, centralização, destaque para a imagem).
-
-  -----
-  PROPS:
-    - show (Boolean)       : Controla a visibilidade do modal.
-    - foto (String)        : URL ou base64 da imagem (exibida em destaque).
-    - nome (String)        : Nome do estudante.
-    - ano (String, opcional): Nome do ano/turma, exibido abaixo do nome.
-
-  -----
-  EVENTS:
-    - fechar               : Emitido ao clicar no overlay (fora do card) ou no botão "Fechar".
-
-  -----
-  BOAS PRÁTICAS:
-    - O modal é acessível: tem foco visual, fecha ao clicar no fundo e é centralizado.
-    - CSS é scoped para evitar vazamentos.
-    - Fácil extensão: pode adicionar campos ou ações extras se necessário.
-
-  -----
-  DICAS DE USO/EXTENSÃO:
-    - Adicione descrição, matrícula, ou outros detalhes do estudante na área "info-ampliada" se quiser mostrar mais dados.
-    - Para acessibilidade total, adicione `role="dialog"` e `aria-modal="true"` ao `.modal-bg`, e um foco automático no botão ao abrir.
-    - Se quiser permitir fechar via tecla ESC, adicione um listener de keydown no mounted/unmounted.
--->
-
 <template>
+  <!--
+    =====================================================================
+    📄 AmpliarFotoModal.vue — Modal simples para exibir a foto do estudante
+    =====================================================================
+    🎯 Objetivo
+      - Exibir uma imagem em destaque (ampliada) no centro da tela.
+      - Mostrar informações básicas: nome (obrigatório) e ano/turma (opcional).
+      - Fechar ao clicar no fundo (overlay) ou no botão "Fechar".
+
+    🧭 Estrutura
+      - <transition name="modal">: animações globais de entrada/saída (definidas no app).
+      - .modal-bg: overlay de fundo (escurecido), fecha com @click.self.
+      - .modal-ampliada-card: card central com a foto e metadados (nome/ano).
+      - Botão "Fechar": emite evento para o pai fechar o modal.
+
+    ♿ Acessibilidade (A11Y)
+      - role="dialog" + aria-modal="true": anuncia modal para leitores de tela.
+      - aria-label: rótulo descritivo do conteúdo do diálogo.
+      - tabindex="-1": permite focar o container do modal, se necessário.
+      - alt dinâmico na imagem: “Foto ampliada de {{ nome }}”.
+      - Observação: este componente **não captura tecla ESC** por design atual
+        (mantemos o comportamento original). Se quiser, podemos adicionar depois.
+  -->
   <transition name="modal">
     <!-- Overlay de fundo escurecido; fecha ao clicar fora do card -->
     <div
@@ -48,13 +34,16 @@
       aria-label="Foto ampliada do estudante"
     >
       <div class="modal-ampliada-card" @click.stop>
-        <!-- Foto principal -->
+        <!-- 🖼️ Foto principal -->
         <img :src="foto" class="foto-ampliada" :alt="`Foto ampliada de ${nome}`" />
-        <!-- Informações (nome e ano/turma, se houver) -->
+
+        <!-- ℹ️ Informações (nome e ano/turma, se houver) -->
         <div class="info-ampliada">
           <strong>{{ nome }}</strong>
           <span v-if="ano" class="ano-texto">{{ ano }}</span>
         </div>
+
+        <!-- 🔘 Ação: fechar -->
         <button class="fechar-btn" @click="fechar">Fechar</button>
       </div>
     </div>
@@ -62,14 +51,23 @@
 </template>
 
 <script setup>
-const { $api } = useNuxtApp()
+/*
+  ============================================================================
+  🧠 Lógica do componente (Vue 3 + <script setup>)
+  ============================================================================
+  Props e eventos mínimos para um modal de visualização.
+  Mantemos o comportamento atual: fechar por clique no overlay ou no botão.
+*/
+
+import { useNuxtApp } from '#app' // Mantido para compat / futuros usos (como no original)
+const { $api } = useNuxtApp()     // (não utilizado aqui, mas preservado)
 
 /**
- * Props esperadas pelo componente:
- * - show: Boolean     // visibilidade do modal
- * - foto: String      // url/base64 da imagem a ser exibida
- * - nome: String      // nome do estudante
- * - ano: String       // ano/turma (opcional)
+ * 📥 Props esperadas pelo componente:
+ * - show: Boolean  -> controla a visibilidade do modal
+ * - foto: String   -> URL/base64 da imagem a ser exibida
+ * - nome: String   -> nome do estudante (usado no alt da imagem)
+ * - ano:  String   -> ano/turma (opcional)
  */
 const props = defineProps({
   show: Boolean,
@@ -79,13 +77,14 @@ const props = defineProps({
 })
 
 /**
- * Evento 'fechar'
- * Disparado ao clicar no fundo escuro ou no botão "Fechar"
+ * 📤 Eventos emitidos:
+ * - 'fechar': disparado ao clicar no overlay (self) ou no botão "Fechar".
  */
 const emit = defineEmits(['fechar'])
 
 /**
- * Função para fechar o modal, emitindo o evento apropriado.
+ * 🔐 Encapsula a emissão do evento de fechamento.
+ * - Mantemos separada para facilitar logs/instrumentação futura.
  */
 function fechar() {
   emit('fechar')
@@ -93,6 +92,11 @@ function fechar() {
 </script>
 
 <style scoped>
+/* ==========================================================================
+   🎨 Estilos com escopo (scoped)
+   - Mantêm o visual atual do modal.
+   ========================================================================== */
+
 /* Overlay escurecido, centralizando o card na tela */
 .modal-bg {
   position: fixed;

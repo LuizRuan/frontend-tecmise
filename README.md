@@ -1,155 +1,147 @@
-# TecMise — Sistema Completo de Gestão Escolar
+TecMise — Sistema de Gestão Escolar (Frontend)
 
-Bem-vindo ao **TecMise**, uma aplicação web moderna para **gestão escolar** com foco em cadastro, listagem, edição e remoção de estudantes, anos/turmas e perfis de usuário.
+Bem-vindo ao TecMise, uma aplicação web moderna para gestão escolar com foco em cadastro, listagem, edição e gerenciamento de estudantes, anos/turmas e perfis de usuário.
 
-Projeto construído utilizando:
-- **Frontend:** Vue 3 com Nuxt.js
-- **Backend:** Go (Golang, API RESTful)
-- **Banco:** PostgreSQL
-- **ORM:** sqlc (sugerido)
-- **Comunicação:** JSON via API REST
+🚀 Tecnologias Utilizadas
 
----
+Frontend: Vue 3 + Nuxt.js
 
-## Índice
+Backend: Go (API RESTful)
 
-- [Visão Geral](#visão-geral)
-- [Principais Funcionalidades](#principais-funcionalidades)
-- [Arquitetura do Projeto](#arquitetura-do-projeto)
-- [Demonstração Visual](#demonstração-visual)
-- [Instalação e Execução](#instalação-e-execução)
-- [Padrões e Boas Práticas](#padrões-e-boas-práticas)
-- [Contribuição](#contribuição)
-- [Licença](#licença)
+Banco: PostgreSQL
 
----
+ORM: sqlc (no backend)
 
-## Visão Geral
+Comunicação: JSON via API REST
 
-O **TecMise** foi desenvolvido com foco em **experiência do usuário**, performance e código limpo/documentado. O painel principal (dashboard) permite ao usuário:
-- Visualizar estudantes por Ano/Turma
-- Filtrar, buscar e editar rapidamente informações
-- Utilizar modais amigáveis para todas as ações (cadastro, edição, exclusão, visualização ampliada de fotos, logout e perfil)
-- Interface responsiva, acessível e visualmente agradável
+📌 Visão Geral
 
----
+O TecMise foi desenvolvido para entregar experiência simples e eficiente tanto para escolas quanto para usuários finais.
 
-## Principais Funcionalidades
+O Dashboard é o coração do sistema, permitindo:
 
-- **Listagem de Estudantes** com ordenação, busca e filtros dinâmicos
-- **CRUD Completo** (criar, editar, remover estudantes)
-- **Upload de Foto** (avatar para estudantes e usuário)
-- **Filtros por Ano/Turma** (dropdown customizado e rápido)
-- **Busca Instantânea** (nome/email, com resultados parciais)
-- **Modais Padronizados** para todas as ações (altamente reutilizáveis)
-- **Perfil de Usuário** com edição de nome e foto
-- **Logout Seguro** (modal de confirmação)
-- **Responsividade total** (experiência otimizada para desktop e mobile)
-- **Validação de dados no frontend e backend** (ex: e-mail, CPF, campos obrigatórios)
-- **Documentação extensiva** em todos os componentes Vue
+Listar estudantes com filtros e buscas rápidas
 
----
+Criar, editar e excluir registros via modais amigáveis
 
-## Arquitetura do Projeto
+Organizar estudantes por Ano/Turma
 
-O frontend foi construído em **Vue 3 + Nuxt.js**, e o código é dividido em componentes desacoplados, cada um responsável por uma parte clara da interface:
+Editar perfil do usuário (nome, foto, logout seguro)
 
-- `Dashboard.vue` — Página principal, orquestra todos os componentes, mantém o estado global do dashboard.
-- `EstudantesTable.vue` — Tabela de estudantes com ordenação e ações.
-- `FiltrosEstudante.vue` — Filtro por Ano/Turma.
-- `EstudanteModal.vue` — Modal para cadastro/edição de estudante (com upload de foto).
-- `ModalAdicionarAno.vue` — Modal para adicionar novo Ano/Turma.
-- `PerfilModal.vue` — Modal de edição do perfil do usuário.
-- `ConfirmarExclusaoModal.vue` — Modal de confirmação para remover estudante.
-- `ConfirmarLogoutModal.vue` — Modal de confirmação para logout.
-- `AmpliarFotoModal.vue` — Modal para visualizar foto ampliada do estudante.
+Interface responsiva e intuitiva para desktop e mobile
 
-> Todos os componentes foram **altamente documentados** e seguem boas práticas de UX, acessibilidade, organização e CSS modularizado (scoped).
+⚡ Funcionalidades
 
----
+✅ CRUD de Estudantes (nome, e-mail, CPF, telefone, foto, turma/ano)
 
-## Instalação e Execução
+✅ Filtros por Ano/Turma (dropdown customizado)
 
-### Pré-requisitos
+✅ Busca em tempo real por nome ou e-mail
 
-- **Node.js:** v22.17.1 ou superior  
-- **npm:** (ou yarn, mas usei npm)
-- **Go:** v1.20 ou superior (recomendado para rodar o backend)
-- **PostgreSQL:** 12+  
-- **sqlc:** para geração do código do ORM no backend
+✅ Upload de Fotos (usuário e estudante)
 
-### Como rodar o projeto
+✅ Perfil do Usuário com edição de dados
 
-#### 1. Clone o repositório
+✅ Logout com confirmação
 
-```bash
-git clone https://github.com/seu-usuario/tecmise.git
+✅ Modais reutilizáveis para todas as ações
+
+✅ Validações front + back (CPF, e-mail, campos obrigatórios)
+
+✅ Responsividade total (desktop, tablet e mobile)
+
+🏗️ Arquitetura do Frontend
+
+O projeto segue componentização máxima com Vue 3 + Nuxt:
+
+Dashboard.vue → Tela principal, gerencia estado global e orquestra modais
+
+EstudantesTable.vue → Listagem e ações sobre estudantes
+
+FiltrosEstudante.vue → Dropdown e filtros de turma/ano
+
+EstudanteModal.vue → CRUD de estudante com upload de foto
+
+ModalAdicionarAno.vue → Criação de novos anos/turmas
+
+PerfilModal.vue → Edição de perfil do usuário
+
+ConfirmarExclusaoModal.vue → Exclusão segura
+
+ConfirmarLogoutModal.vue → Logout seguro
+
+AmpliarFotoModal.vue → Visualização de fotos ampliadas
+
+Todos os componentes possuem documentação em comentários, com props, emits e regras de uso bem descritas.
+
+⚙️ Instalação e Execução
+🔑 Pré-requisitos
+
+Node.js: v22.17.1 ou superior
+
+npm (ou yarn)
+
+Go: v1.20+ (para rodar o backend)
+
+PostgreSQL: 12+
+
+Passo a passo
+1. Baixe o projeto
+[git clone https://github.com/seu-usuario/tecmise.git](https://github.com/LuizRuan/frontend-tecmise)
 cd tecmise
-````
 
-#### 2. Instale as dependências do frontend
-
-```bash
+2. Instale as dependências do frontend
 cd frontend
 npm install
-```
 
-#### 3. Rode o frontend (modo dev)
-
-```bash
+3. Rode o frontend em modo desenvolvimento
 npm run dev
-```
 
-Acesse: [http://localhost:3000](http://localhost:3000)
 
-#### 4. Configure o backend
+👉 Acesse em: http://localhost:3000
 
-* Configure variáveis de ambiente do banco (`.env`)
-* Gere o código sqlc (ORM)
-* Rode o servidor Go
-
-```bash
+4. Configure e rode o backend
 cd ../backend
-go run main.go
-```
+go run .
 
-O backend sobe por padrão em: [http://localhost:8080](http://localhost:8080)
 
-#### 5. Banco de dados
+👉 Backend disponível em: http://localhost:8080
 
-* Crie um banco PostgreSQL, configure os dados de acesso em `.env`
-* Execute as migrations/tabelas necessárias (sql fornecido na pasta `/db/migrations` ou conforme modelo no projeto)
+5. Configure o banco
 
----
+Crie um banco PostgreSQL
 
-## Padrões e Boas Práticas
+Ajuste as credenciais no arquivo .env
 
-* **Componentização máxima:** cada modal, filtro e tabela é um Vue Component isolado
-* **CSS scoped**: estilos 100% encapsulados
-* **Documentação em todos os arquivos Vue** (comentários de props, emits, UX, manutenção)
-* **UX/Acessibilidade:** modais centralizados, uso de ARIA, foco visual, botões grandes
-* **Validação em camada dupla:** tanto frontend quanto backend validam campos críticos
+Rode as migrations fornecidas em /db/migrations
 
----
+📝 Padrões e Boas Práticas
 
-## Como contribuir
+🔹 Componentização: tudo isolado em Vue Components
 
-Pull requests e sugestões são bem-vindos!
-Se encontrar bugs, melhorias ou ideias, abra uma issue ou mande um PR.
+🔹 CSS Scoped: cada componente com estilo encapsulado
 
----
+🔹 Documentação clara: comentários em PT-BR nos arquivos
 
-## Licença
+🔹 Acessibilidade: foco visual, botões grandes, ARIA tags
 
-Este projeto está sob a licença MIT — veja o arquivo [LICENSE](LICENSE) para detalhes.
+🔹 Validação dupla: frontend e backend validam dados críticos
 
----
+🤝 Contribuição
 
-## Sobre o autor
+Contribuições são bem-vindas!
 
-Desenvolvido por \[Luiz Ruan]
-Contato: \[[Gmail](mailto:ruansiqueiraandrade@email.com)] | [LinkedIn](https://linkedin.com/in/LuizRuan)
+Abra uma issue para sugestões ou bugs
 
----
+Envie um pull request com melhorias
 
-> Projeto criado para avaliação técnica, **com foco em código limpo, usabilidade e documentação**.
+📄 Licença
+
+Projeto licenciado sob a MIT License — veja o arquivo LICENSE.
+
+👤 Autor
+
+Desenvolvido por Luiz Ruan
+ | 🌐 [LinkedIn](https://www.linkedin.com/in/ruan-andrade-a16083346/)
+
+✨ TecMise — Gestão escolar mais conectada, moderna e eficiente.

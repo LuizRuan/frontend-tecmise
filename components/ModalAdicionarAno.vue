@@ -1,46 +1,73 @@
 <!--
-  ModalAdicionarAno.vue
+  =====================================================================
+  📄 ModalAdicionarAno.vue
+  =====================================================================
+  🎯 Responsabilidade:
+    - Exibir um modal para adicionar um novo "Ano e Turma".
+    - Possibilitar que o usuário insira o nome do ano/turma.
+    - Emitir eventos de salvar ou cancelar para o componente pai.
 
-  🎯 **Responsabilidade**:
-    - Modal dedicado para adicionar um novo "Ano" escolar.
-    - Interface simples para entrada do nome do ano e confirmação/cancelamento.
+  📦 Como funciona:
+    - O modal é exibido quando a prop `show` é verdadeira.
+    - O campo de input é controlado reativamente por `inputNome`.
+    - Ao salvar, emite o valor digitado para o pai (`salvar`).
+    - Ao cancelar, reseta o campo e emite evento `cancelar`.
+    - Fecha automaticamente ao clicar fora ou pressionar "Cancelar".
 
-  📦 **Como funciona**:
-    - Modal controlado por prop `show` (aberto/fechado) — controlado pelo componente pai.
-    - Campo controlado via ref reativo, sempre sincronizado com a prop `nome`.
-    - Não faz nenhuma lógica de persistência, apenas emite eventos.
+  🔄 Eventos emitidos:
+    - salvar (String)   → retorna o valor digitado.
+    - cancelar          → notifica o fechamento sem salvar.
 
-  📥 **Props**:
-    - show: Boolean — exibe/esconde o modal.
-    - nome: String  — valor inicial do input, útil para reset ou para edição futura.
+  ♿ Acessibilidade:
+    - Usa `role="dialog"` e `aria-modal="true"`.
+    - O título do modal é referenciado por `aria-labelledby`.
 
-  📤 **Emits**:
-    - salvar(nome: String)   — usuário clicou "Salvar" e envia o nome digitado.
-    - cancelar               — usuário clicou "Cancelar" ou fechou o modal.
+  🛡️ Estados importantes:
+    - show (prop Boolean) → controla visibilidade do modal.
+    - nome (prop String)  → valor inicial do input (opcional).
+    - inputNome (ref)     → estado interno do campo de texto.
 
-  💡 **Princípios Sólidos**:
-    - **Stateless:** Não guarda estado relevante, todo controle fica no pai.
-    - **UX:** Modal fecha ao clicar fora da área central (via @click.self).
-    - **Extensível:** Se quiser transformar em modal de edição de ano/turma, basta adaptar prop e label.
-    - **Acessibilidade:** Layout centralizado, botão destacado, foco visual claro.
-
-  🚩 **Atenção**:
-    - Campo input sincronizado manualmente via `watch` para garantir que seja resetado sempre que reabrir.
-    - Validação (ex: obrigatoriedade, formato) é responsabilidade do pai — aqui só captura e retorna valor.
-
-  📋 **Projeto: TecMise - Gestão Escolar**
+  🛠️ Melhorias:
+    - Reset automático do campo ao abrir ou fechar.
+    - Fechamento seguro com clique fora.
+    - Uso de watch para manter compatibilidade com a prop `nome`.
 -->
 
 <template>
   <transition name="modal">
-    <div v-if="show" class="modal-bg" @click.self="onClose">
+    <!-- Overlay do modal -->
+    <div
+      v-if="show"
+      class="modal-bg"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-adicionar-ano-title"
+      @click.self="onClose"
+    >
+      <!-- Conteúdo principal -->
       <div class="modal-card" @click.stop>
-        <h3 class="modal-title">Adicionar Novo Ano</h3>
-        <input v-model="inputNome" type="text" class="input-ano" placeholder="Nome do ano (Ex: 8º ano)" @keyup.enter="emitSalvar"
-/>
+        <!-- Título acessível -->
+        <h3 id="modal-adicionar-ano-title" class="modal-title">
+          Adicionar Novo Ano e Turma
+        </h3>
+
+        <!-- Campo de entrada -->
+        <input
+          v-model="inputNome"
+          type="text"
+          class="input-ano"
+          placeholder="Ex: 8º A"
+          @keyup.enter="emitSalvar"
+        />
+
+        <!-- Área de botões -->
         <div class="modal-btns">
-          <button @click="emitSalvar">Salvar</button>
-          <button @click="emitCancelar" type="button">Cancelar</button>
+          <button class="btn-salvar" type="button" @click="emitSalvar">
+            Salvar
+          </button>
+          <button class="btn-cancelar" type="button" @click="emitCancelar">
+            Cancelar
+          </button>
         </div>
       </div>
     </div>
@@ -48,133 +75,162 @@
 </template>
 
 <script setup>
-const { $api } = useNuxtApp()
-
 /**
- * ModalAdicionarAno.vue
- *
- * Modal controlado por props, apenas emite eventos para o pai manipular lógica.
- * Props:
- *  - show: Boolean (visibilidade)
- *  - nome: String (valor inicial do campo)
- * Emits:
- *  - salvar (String)
- *  - cancelar
+ * ===========================================================
+ *  Imports e Definições
+ * ===========================================================
  */
 import { ref, watch } from 'vue'
 
+/* Props do componente pai */
 const props = defineProps({
-  show: Boolean,
-  nome: String
+  show: Boolean,  // controla exibição
+  nome: String    // valor inicial (opcional)
 })
+
+/* Eventos que o modal emite */
 const emit = defineEmits(['salvar', 'cancelar'])
 
+/* Estado interno do input */
 const inputNome = ref(props.nome || '')
 
-// Sincroniza campo toda vez que prop nome muda (ao reabrir/resetar)
-watch(() => props.nome, (val) => {
-  inputNome.value = val || ''
+/**
+ * ===========================================================
+ *  Reatividade
+ * ===========================================================
+ */
+
+/* Atualiza valor do input se `nome` mudar no pai */
+watch(() => props.nome, v => {
+  inputNome.value = v || ''
 })
 
-/** Emite evento salvar, enviando o valor digitado */
+/* Sempre que abrir o modal, limpa o campo */
+watch(() => props.show, v => {
+  if (v) inputNome.value = ''
+})
+
+/**
+ * ===========================================================
+ *  Métodos
+ * ===========================================================
+ */
+
+/** Salva valor digitado e emite para o pai */
 function emitSalvar() {
-  emit('salvar', inputNome.value)
+  const val = (inputNome.value || '').trim()
+  if (!val) return
+  emit('salvar', val)
+  inputNome.value = '' // limpa após salvar
 }
-/** Emite evento cancelar */
+
+/** Cancela, limpa o campo e notifica o pai */
 function emitCancelar() {
+  inputNome.value = ''
   emit('cancelar')
 }
-/** Alias para fechar modal pelo fundo */
+
+/** Fecha modal ao clicar fora */
 function onClose() {
   emitCancelar()
 }
 </script>
 
 <style scoped>
+/* Overlay do modal */
 .modal-bg {
-  position: fixed; top:0; left:0; width:100vw; height:100vh;
-  background: rgba(23,40,64,0.78);
-  display: flex; align-items: center; justify-content: center;
+  position: fixed;
+  inset: 0;
   z-index: 99;
+  background: rgba(23, 40, 64, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+/* Card principal */
 .modal-card {
   background: #183765;
   border-radius: 15px;
-  max-width: 480px;
-  min-width: 390px;
-  min-height: 220px;
+  width: min(92vw, 480px);
   box-shadow: 0 12px 50px #16213a42;
   text-align: center;
-  padding: 2.2rem 2.2rem 1.6rem 2.2rem;
-  animation: modal-pop 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
+  padding: 2.1rem 2rem 1.6rem;
+  animation: pop 0.28s cubic-bezier(0.24, 0.7, 0.41, 0.99);
 }
-@keyframes modal-pop {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
 }
+
+/* Título */
 .modal-title {
-  color: #32e0ff;
-  font-size: 1.38rem;
-  font-weight: bold;
-  margin-bottom: 22px;
-  margin-top: 4px;
+  color: #3bc7ff;
+  font-weight: 700;
+  font-size: 1.16rem;
+  margin-bottom: 17px;
 }
+
+/* Campo de entrada */
 .input-ano {
   width: 100%;
-  max-width: 300px;
-  padding: 13px 16px;
-  border-radius: 10px;
-  border: none;
-  background: #223f6c;
-  color: #c6f3ff;
-  font-size: 1.09rem;
-  font-family: inherit;
-  transition: background .15s, color .15s;
-  margin-bottom: 0;
-  margin-top: 0;
+  box-sizing: border-box;
+  padding: 0.57rem 1rem;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  border: 1.2px solid #3b5998;
+  background: #25447b;
+  color: #fff;
+  font-size: 0.97rem;
+  outline: none;
+  transition: border 0.19s, background 0.19s, box-shadow 0.18s;
 }
 .input-ano::placeholder {
-  color: #7cd6fc;
-  opacity: 0.9;
+  color: #ffffff;
 }
 .input-ano:focus {
-  background: #3282b8;
-  outline: none;
-  color: #fff;
+  border-color: #3bc7ff;
+  background: #295291;
+  box-shadow: 0 0 0 3px rgba(60, 193, 255, 0.18);
 }
+
+/* Botões */
 .modal-btns {
   display: flex;
   gap: 12px;
   justify-content: center;
-  margin-top: 38px;
+  margin-top: 6px;
 }
-.modal-btns button {
-  min-width: 110px;
-  padding: 11px 0;
+.btn-salvar {
+  padding: 0.62rem 1.09rem;
+  border-radius: 7px;
   border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 1.07rem;
-  background: linear-gradient(90deg, #16e0ff 30%, #2956a6 100%);
-  color: #fff;
+  font-size: 1.01rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background .18s, filter .15s;
-  box-shadow: 0 1px 7px #1b456250;
-}
-.modal-btns button[type="button"] {
-  background: #223a5c;
-  color: #d3f5ff;
-}
-.modal-btns button:hover {
-  filter: brightness(1.15);
-  transform: scale(1.04);
-}
-.modal-btns button[type="button"]:hover {
-  background: #335e97;
+  background: linear-gradient(90deg, #32e0ff 30%, #2956a6 100%);
   color: #fff;
+  transition: transform 0.17s, filter 0.17s;
+}
+.btn-salvar:hover {
+  transform: scale(1.03);
+  filter: brightness(1.1);
+}
+
+.btn-cancelar {
+  padding: 0.62rem 1.09rem;
+  border-radius: 7px;
+  border: none;
+  font-size: 1.01rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #2b334b;
+  color: #f64f61;
+  transition: background 0.17s, color 0.16s, transform 0.17s;
+}
+.btn-cancelar:hover {
+  background: #ff5b5b;
+  color: #fff;
+  transform: scale(1.02);
 }
 </style>
