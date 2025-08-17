@@ -644,29 +644,189 @@ function fecharPopups(){
 
 <style scoped>
 /* ==========================================================================
-   🎨 Estilos (mantidos como no original)
+   🎨 Estilos 
    ========================================================================== */
-.dashboard-bg{ min-height:100vh; background:radial-gradient(ellipse at 80% 60%, #2d80c4 30%, #224277 100%); font-family:var(--app-font,'Montserrat'), Arial, sans-serif; padding-bottom:40px; }
-.dashboard-container.expandido{ max-width:1440px; margin:0 auto; padding:0 28px 36px; }
+/* ===========================
+   LAYOUT DE FUNDO / CONTAINER
+   =========================== */
 
-.header{ display:flex; align-items:center; justify-content:space-between; padding:8px 0 0; height:100px; }
-.logo-flex{ display:flex; align-items:center; height:100px; }
-.logo-img{ width:220px; max-height:90px; object-fit:contain; }
-.user-info{ display:flex; align-items:center; gap:12px; }
-.user-name{ color:#e7f3ff; font-size:1.06rem; }
-.profile-btn{ background: linear-gradient(90deg,#33aaff 40%,#256cbb 100%); color:#fff; border:none; border-radius:12px; padding:10px 20px; font-weight:700; font-size:1.01rem; cursor:pointer; box-shadow:0 1px 8px #22437740; transition:filter .16s, transform .12s; }
-.profile-btn:hover{ filter:brightness(1.1); transform:translateY(-1px); }
+/* Fundo geral da área logada (gradiente + fonte + padding inferior para respiro) */
+.dashboard-bg{
+  min-height: 100vh; /* ocupa a altura inteira da tela */
+  background: radial-gradient(ellipse at 80% 60%, #2d80c4 30%, #224277 100%); /* gradiente oval deslocado */
+  font-family: var(--app-font,'Montserrat'), Arial, sans-serif; /* fallback de fontes */
+  padding-bottom: 40px; /* espaço ao final (ex.: para cards com sombra) */
+}
 
-.main-content.expandido-main{ background:rgba(33,55,110,.97); border-radius:26px; padding:40px 52px 30px; min-height:590px; box-shadow:0 4px 38px #10254b20; display:flex; flex-direction:column; }
-.clientes-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:26px; flex-wrap:wrap; gap:1rem; }
-.titulo-lista{ color:#fff; font-size:1.6rem; font-weight:800; margin:0; }
-.acoes-header{ display:flex; align-items:center; gap:14px; }
+/* Container central com largura máxima e respiros laterais */
+.dashboard-container.expandido{
+  max-width: 1440px;  /* limita a largura para não “esticar” demais em monitores grandes */
+  margin: 0 auto;     /* centraliza horizontalmente */
+  padding: 0 28px 36px; /* espaçamento interno (topo 0, laterais 28px, base 36px) */
+}
 
-.add-btn{ background: linear-gradient(90deg,#33aaff 40%,#256cbb 100%); color:#fff; border:none; border-radius:12px; padding:12px 26px; font-size:1.02rem; font-weight:700; cursor:pointer; box-shadow:0 1px 8px #22437740; transition:filter .16s, box-shadow .16s, transform .12s; }
-.add-btn:hover{ filter:brightness(1.1); box-shadow:0 6px 24px #0a355f60; transform:translateY(-1px); }
+/* ============
+   CABEÇALHO
+   ============ */
 
-.lock-overlay{ position:fixed; inset:0; z-index:9998; pointer-events:auto; }
-.nao-autenticado{ min-height:60vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#1d3557; }
-.nao-autenticado h2{ color:#fff; font-size:2rem; margin-bottom:12px; }
-.nao-autenticado a{ color:#00bbff; font-weight:bold; text-decoration:underline; }
+/* Barra superior do dashboard */
+.header{
+  display: flex;                 /* alinha logo e usuário na mesma linha */
+  align-items: center;           /* centraliza verticalmente */
+  justify-content: space-between;/* espaço entre logo e info do usuário */
+  padding: 8px 0 0;              /* respiro no topo */
+  height: 100px;                 /* altura fixa do header */
+}
+
+/* Wrapper da logo (controla altura e alinhamento) */
+.logo-flex{
+  display: flex;
+  align-items: center;
+  height: 100px;                 /* mantém mesma altura do header */
+}
+
+/* Imagem da logo (tamanho e contenção) */
+.logo-img{
+  width: 220px;                  /* largura “confortável” para a marca */
+  max-height: 90px;              /* evita estourar verticalmente */
+  object-fit: contain;           /* preserva proporção sem cortar */
+}
+
+/* Área de informações do usuário (nome + botão perfil) */
+.user-info{
+  display: flex;
+  align-items: center;
+  gap: 12px;                     /* espaço entre nome e botão */
+}
+
+/* Saudação/identificação do usuário */
+.user-name{
+  color: #e7f3ff;                /* texto claro sobre fundo escuro */
+  font-size: 1.06rem;            /* levemente maior que o padrão */
+}
+
+/* Botão de acesso ao modal de Perfil */
+.profile-btn{
+  background: linear-gradient(90deg,#33aaff 40%,#256cbb 100%); /* gradiente azul */
+  color: #fff;
+  border: none;
+  border-radius: 12px;           /* cantos arredondados macios */
+  padding: 10px 20px;            /* área clicável confortável */
+  font-weight: 700;              /* dá presença ao texto */
+  font-size: 1.01rem;
+  cursor: pointer;
+  box-shadow: 0 1px 8px #22437740;             /* leve sombra para destaque */
+  transition: filter .16s, transform .12s;     /* animações suaves no hover */
+}
+
+/* Feedback ao passar o mouse no botão de perfil */
+.profile-btn:hover{
+  filter: brightness(1.1);       /* um pouco mais claro */
+  transform: translateY(-1px);   /* leve “flutuar” para cima */
+}
+
+/* ===========================
+   CONTEÚDO PRINCIPAL (CARD)
+   =========================== */
+
+/* Card principal do dashboard (fundo, raio, sombra etc.) */
+.main-content.expandido-main{
+  background: rgba(33,55,110,.97); /* azul escuro translúcido (quase sólido) */
+  border-radius: 26px;             /* cantos arredondados grandes */
+  padding: 40px 52px 30px;         /* respiros internos (topo/lados/base) */
+  min-height: 590px;               /* garante “corpo” do card */
+  box-shadow: 0 4px 38px #10254b20;/* sombra ampla e suave */
+  display: flex;
+  flex-direction: column;          /* conteúdo empilhado verticalmente */
+}
+
+/* Cabeçalho da seção de estudantes (título + ações) */
+.clientes-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;  /* título à esquerda, ações à direita */
+  margin-bottom: 26px;             /* espaço abaixo do cabeçalho */
+  flex-wrap: wrap;                  /* quebra linha em telas pequenas */
+  gap: 1rem;                        /* respiro entre itens quando quebrar */
+}
+
+/* Título “Estudantes” */
+.titulo-lista{
+  color: #fff;
+  font-size: 1.6rem;               /* destaque */
+  font-weight: 800;                /* bem forte */
+  margin: 0;                       /* remove margem padrão do h2/h3 */
+}
+
+/* Wrapper dos botões e filtros no cabeçalho */
+.acoes-header{
+  display: flex;
+  align-items: center;
+  gap: 14px;                       /* espaço uniforme entre controles */
+}
+
+/* ===========================
+   BOTÕES DE AÇÃO (AZUL)
+   =========================== */
+
+.add-btn{
+  background: linear-gradient(90deg,#33aaff 40%,#256cbb 100%); /* mesmo gradiente do perfil p/ consistência */
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 26px;              /* um pouco maior que o profile p/ ação primária */
+  font-size: 1.02rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 1px 8px #22437740; /* sombra leve */
+  transition: filter .16s, box-shadow .16s, transform .12s; /* animações */
+}
+
+/* Hover dos botões de ação */
+.add-btn:hover{
+  filter: brightness(1.1);         /* clareia */
+  box-shadow: 0 6px 24px #0a355f60;/* sombra mais pronunciada */
+  transform: translateY(-1px);     /* leve elevação */
+}
+
+/* ===========================
+   OVERLAYS E ESTADOS
+   =========================== */
+
+/* Camada de bloqueio durante o tutorial (impede cliques) */
+.lock-overlay{
+  position: fixed;
+  inset: 0;                        /* cobre a tela inteira */
+  z-index: 9998;                   /* acima de quase tudo */
+  pointer-events: auto;            /* captura cliques para bloquear */
+}
+
+/* ===========================
+   ESTADO: NÃO AUTENTICADO
+   =========================== */
+
+/* Tela simples para sessão expirada / usuário não logado */
+.nao-autenticado{
+  min-height: 60vh;                /* ocupa boa parte da tela */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;         /* centraliza verticalmente */
+  align-items: center;             /* centraliza horizontalmente */
+  background: #1d3557;             /* fundo sólido coerente com o tema */
+}
+
+/* Título do estado não autenticado */
+.nao-autenticado h2{
+  color: #fff;
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+/* Link para “Fazer login” */
+.nao-autenticado a{
+  color: #00bbff;                  /* azul claro para chamar atenção */
+  font-weight: bold;
+  text-decoration: underline;      /* deixa claro que é um link */
+}
+
 </style>

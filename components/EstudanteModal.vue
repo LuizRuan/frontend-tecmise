@@ -26,7 +26,7 @@
     - show:Boolean       • visibilidade do modal
     - editando:Boolean   • modo edição (true) ou cadastro (false)
     - form:Object        • dados vindos do pai (ex.: { id, nome, ... })
-    - erros:Object       • erros externos (mantido por compat)
+    - erros:Object       • erros externos (usado para desligar "Salvando..." em caso de erro do backend)
     - anosTurmas:Array   • opções { id, nome } para o select de Ano/Turma
     - defaultAvatar:String • URL do avatar padrão
     - checkCpf:Function  • async(cpf, ignoreId?) ⇒ boolean (duplicado?)
@@ -47,24 +47,10 @@
     - previewFoto      • computed: mostra `local.fotoUrl` ou `defaultAvatar`
     - disableSalvar    • computed: desabilita botão quando `salvando` = true
 
-  🧰 Utilitários
-    - onlyDigits       • remove tudo que não é dígito
-    - cpfMask/telMask  • máscaras visuais
-    - dataMaskBR       • máscara dd/mm/aaaa
-    - isoToBR / parseBrDateToISO / isValidISODate / isFutureISO
-    - coerceInvalidOrFutureToToday • evita datas inválidas/futuras
-    - basicEmailOk / isValidEmailStrict / normalizeEmail
-    - isValidCPF       • valida dígitos verificadores (DV)
-    - debounce         • limita chamadas de duplicidade
-
   ♿ Acessibilidade
     - role="dialog", aria-modal="true", aria-labelledby
     - foco automático no container ao abrir
     - fecha com ESC e clique no backdrop
-
-  ⚠️ Notas de implementação
-    - Comentários **não** alteram a lógica; layout, classes e comportamento permanecem iguais.
-    - Tamanho máximo de foto: 5MB (silenciosamente ignorado se exceder).
 -->
 <template>
   <transition name="modal">
@@ -144,10 +130,13 @@
             placeholder="dd/mm/aaaa"
             aria-label="Data de nascimento"
             inputmode="numeric"
-            :class="{ erroInput: false }"
+            :class="{ erroInput: touched.dataNascimento && msg.dataNascimento }"  
             @input="onDataInput"
-            @blur="onDataBlur"
+            @blur="onDataBlur"                                                    
           />
+          <p v-if="touched.dataNascimento && msg.dataNascimento" class="erro-msg"> 
+            {{ msg.dataNascimento }}
+          </p>
 
           <!-- Telefone (mascarado na view; valor real em `local.telefone`) -->
           <input
@@ -403,9 +392,15 @@ function onDataInput(e){
   }
 }
 function onDataBlur(){
-  if (!local.dataNascimento) return
+  // [ALTERAÇÃO] marcar como "tocado" e validar obrigatoriedade
+  touched.dataNascimento = true
+  if (!local.dataNascimento) {
+    msg.dataNascimento = 'Informe a data de nascimento.'
+    return
+  }
   const coerced = coerceInvalidOrFutureToToday(local.dataNascimento)
   local.dataNascimento = coerced
+  msg.dataNascimento = ''
 }
 
 /* --------------------------------------------------------------------------
@@ -447,8 +442,13 @@ function validarCampo(campo){
       break
     }
     case 'dataNascimento':
-      if ((local.dataNascimento || '').length) local.dataNascimento = coerceInvalidOrFutureToToday(local.dataNascimento)
-      msg.dataNascimento = ''
+      // [ALTERAÇÃO] tornar obrigatório + normalizar quando houver valor
+      if (!local.dataNascimento) {
+        msg.dataNascimento = 'Informe a data de nascimento.'
+      } else {
+        local.dataNascimento = coerceInvalidOrFutureToToday(local.dataNascimento)
+        msg.dataNascimento = ''
+      }
       break
     case 'telefone':
       msg.telefone = local.telefone && local.telefone.length!==11 ? 'Telefone inválido.' : ''
@@ -537,6 +537,17 @@ function syncFromProps(){
 -------------------------------------------------------------------------- */
 watch(() => props.show, v => { if(v) syncFromProps() })
 watch(() => props.form, () => { if(props.show) syncFromProps() }, { deep:true })
+
+// [ALTERAÇÃO] se o pai sinalizar erro (ex.: backend retornou erro), desligar "Salvando..."
+watch(() => props.erros, (v) => {
+  if (!props.show) return
+  if (!v) return
+  const temErro =
+    (typeof v.geral === 'string' && v.geral) ||
+    Object.values(v).some(Boolean)
+  if (temErro) salvando.value = false
+}, { deep: true })
+
 onMounted(() => { document.addEventListener('keydown', onEsc); if(props.show) syncFromProps() })
 onBeforeUnmount(() => document.removeEventListener('keydown', onEsc))
 </script>
@@ -575,7 +586,6 @@ input:focus{ border-color:#3bc7ff; background:#295291; box-shadow:0 0 0 3px rgba
 =========================================================== */
 .modal-btns{ display:flex; gap:12px; justify-content:center; margin-top:8px; }
 
-/* Botão salvar (gradiente/hover/focus) */
 .btn-salvar{
   padding:.62rem 1.09rem; border-radius:7px; border:none; font-size:1rem; font-weight:700;
   background:linear-gradient(90deg,#32e0ff 30%, #2956a6 100%);
@@ -599,7 +609,6 @@ input:focus{ border-color:#3bc7ff; background:#295291; box-shadow:0 0 0 3px rgba
 }
 .btn-salvar[disabled]{ opacity:.65; cursor:not-allowed; filter:none; transform:none; box-shadow:none; }
 
-/* Botão cancelar (tema escuro/vermelho) */
 .btn-cancelar{
   padding:.62rem 1.09rem; border-radius:7px; border:none; font-size:1rem; font-weight:700;
   background:#2b334b; color:#f64f61; cursor:pointer;
